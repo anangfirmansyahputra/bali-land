@@ -37,19 +37,17 @@ export default function MapView() {
         },
       });
 
-      // Add a new layer to visualize the polygon.
       map.addLayer({
         'id': 'landPlots',
         'type': 'fill',
-        'source': 'landPlots', // reference the data source
+        'source': 'landPlots',
         'layout': {},
         'paint': {
-          'fill-color': '#0080ff', // blue color fill
+          'fill-color': '#0080ff',
           'fill-opacity': 0.2,
         },
       });
 
-      // Add a black outline around the polygon.
       map.addLayer({
         'id': 'outline',
         'type': 'line',
@@ -64,31 +62,28 @@ export default function MapView() {
 
     const addGeolocationLayer = () => {
       map.addSource('geolocations', {
-        'type': 'geojson',
+        type: 'geojson',
         // @ts-ignore
         "data": {
           "type": 'Feature',
           "geometry": {
             "type": 'MultiPolygon',
-            // @ts-ignore
             "coordinates": geolocations
           },
         },
       });
 
-      // Add a new layer to visualize the polygon.
       map.addLayer({
         'id': 'geolocations',
         'type': 'fill',
-        'source': 'geolocations', // reference the data source
+        'source': 'geolocations',
         'layout': {},
         'paint': {
-          'fill-color': '#0080ff', // blue color fill
+          'fill-color': '#0080ff',
           'fill-opacity': 0.2,
         },
       });
 
-      // Add a black outline around the polygon.
       map.addLayer({
         'id': 'outlineGeolocations',
         'type': 'line',
@@ -102,11 +97,11 @@ export default function MapView() {
     }
 
     map.on('load', () => {
-      // addLandPlotsLayer()
       addGeolocationLayer()
 
       map.on('zoom', () => {
         const currentZoom = map.getZoom();
+
         if (currentZoom < 14) {
           if (map.getLayer('outline')) {
             map.removeLayer('outline');
@@ -142,12 +137,12 @@ export default function MapView() {
         }
       });
 
-      map.addControl(draw, 'top-right')
+      // map.addControl(draw, 'top-right')
 
-      map.on('draw.create', (e) => {
-        const drawnPolygonCoordinates = e.features[0].geometry.coordinates;
-        console.log('Drawn Polygon Coordinates:', drawnPolygonCoordinates);
-      });
+      // map.on('draw.create', (e) => {
+      //   const drawnPolygonCoordinates = e.features[0].geometry.coordinates;
+      //   console.log('Drawn Polygon Coordinates:', drawnPolygonCoordinates);
+      // });
     });
 
     return () => map.remove();
