@@ -26,12 +26,11 @@ export default function MapView() {
     const map = new mapboxgl.Map({
       container: "map",
       style: 'mapbox://styles/mapbox/satellite-streets-v12',
-      // style: 'mapbox://styles/mapbox/satellite-v9',
       center: [115.087004, -8.337301],
       zoom: 9,
       maxBounds: [
-        [114.2, -9.1], // Southwestern bound
-        [116.2, -8.2]  // Northeastern bound
+        [114.2, -9.1],
+        [116.2, -8.2]
       ],
     });
 
@@ -58,26 +57,6 @@ export default function MapView() {
               polygon = certificate?.features?.[0]?.geometry || null
             }
 
-            // if (zoneCode === "W" || zoneCode === "RTH-2") {
-            //   polygon = certificate?.features?.[0]?.geometry
-            // } else if (zoneCode === "BJ") {
-            //   polygon = territorials
-            // } else if (zoneCode === 'BA') {
-            //   polygon = territorials
-            // } else if (zoneCode === 'SS') {
-            //   polygon = territorials
-            // } else if (zoneCode === 'C') {
-            //   polygon = certificate?.features?.[0]?.geometry || null
-            // } else if (zoneCode === 'K-3') {
-            //   polygon = certificate?.features?.[0]?.geometry || null
-            // } else if (zoneCode === 'R-4') {
-            //   polygon = certificate?.features?.[0]?.geometry || null
-            // } else if (zoneCode === 'C-1') {
-            //   polygon = certificate?.features?.[0]?.geometry || null
-            // } else if (zoneCode === 'W-2') {
-            //   polygon = certificate?.features?.[0]?.geometry || null
-            // }
-
             if (polygon !== undefined && polygon !== null) {
               return {
                 type: "Feature",
@@ -89,7 +68,6 @@ export default function MapView() {
                     center: landPlot.center
                   }
                 },
-                // geometry: certificate ? certificate.features[0].geometry : territorials
                 geometry: polygon
               };
             }
