@@ -3,6 +3,7 @@
 import badung from '@/data/badung.json';
 import geolocations from '@/data/geolocations.json';
 import landPlots from '@/data/landPlots.json';
+import landPlots2 from '@/data/land-plots.json';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -24,9 +25,14 @@ export default function MapView() {
 
     const map = new mapboxgl.Map({
       container: "map",
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: [115.105546, -8.6417714],
+      style: 'mapbox://styles/mapbox/satellite-streets-v12',
+      // style: 'mapbox://styles/mapbox/satellite-v9',
+      center: [115.087004, -8.337301],
       zoom: 9,
+      maxBounds: [
+        [114.2, -9.1], // Southwestern bound
+        [116.2, -8.2]  // Northeastern bound
+      ],
     });
 
     // @ts-ignore
@@ -39,24 +45,56 @@ export default function MapView() {
         data: {
           type: "FeatureCollection",
           // @ts-ignore
-          features: landPlots.map((landPlot) => {
+          features: landPlots2.map((landPlot) => {
             const zoneCode = landPlot.territorials.geom[0].zone.code;
-            const territorials = JSON.parse(landPlot.territorials.geom[0].geojson);
+            const territorials = JSON.parse(landPlot?.territorials?.geom?.[0]?.geojson);
             // @ts-ignore
-            const certificate = JSON.parse(landPlot.certificate)
-            return {
-              type: "Feature",
-              properties: {
-                zoneCode: zoneCode,
-                data: {
-                  ...landPlot.territorials.geom[0],
-                  geojson: null,
-                  center: landPlot.center
-                }
-              },
-              geometry: certificate ? certificate.features[0].geometry : territorials
+            const certificate = JSON.parse(landPlot?.certificate)
+            let polygon;
+
+            if (zoneCode === "BJ" || zoneCode === "BA" || zoneCode === "SS") {
+              polygon = territorials
+            } else {
+              polygon = certificate?.features?.[0]?.geometry || null
             }
-          })
+
+            // if (zoneCode === "W" || zoneCode === "RTH-2") {
+            //   polygon = certificate?.features?.[0]?.geometry
+            // } else if (zoneCode === "BJ") {
+            //   polygon = territorials
+            // } else if (zoneCode === 'BA') {
+            //   polygon = territorials
+            // } else if (zoneCode === 'SS') {
+            //   polygon = territorials
+            // } else if (zoneCode === 'C') {
+            //   polygon = certificate?.features?.[0]?.geometry || null
+            // } else if (zoneCode === 'K-3') {
+            //   polygon = certificate?.features?.[0]?.geometry || null
+            // } else if (zoneCode === 'R-4') {
+            //   polygon = certificate?.features?.[0]?.geometry || null
+            // } else if (zoneCode === 'C-1') {
+            //   polygon = certificate?.features?.[0]?.geometry || null
+            // } else if (zoneCode === 'W-2') {
+            //   polygon = certificate?.features?.[0]?.geometry || null
+            // }
+
+            if (polygon !== undefined && polygon !== null) {
+              return {
+                type: "Feature",
+                properties: {
+                  zoneCode: zoneCode,
+                  data: {
+                    ...landPlot.territorials.geom[0],
+                    geojson: null,
+                    center: landPlot.center
+                  }
+                },
+                // geometry: certificate ? certificate.features[0].geometry : territorials
+                geometry: polygon
+              };
+            }
+            return null;
+          }).filter((feature: any) => feature !== null)
         }
       });
 
@@ -68,10 +106,10 @@ export default function MapView() {
         paint: {
           'fill-color': [
             'case',
-            ['==', ['get', 'zoneCode'], 'W'], '#002366',
             ['==', ['get', 'zoneCode'], 'BA'], '#192bc2',
             ['==', ['get', 'zoneCode'], 'BJ'], '#de0a26',
-            '#ffffff'
+            ['==', ['get', 'zoneCode'], 'SS'], '#192bc2',
+            '#fff'
           ],
           'fill-opacity': 0.5,
         },
@@ -85,9 +123,9 @@ export default function MapView() {
         paint: {
           'line-color': [
             'case',
-            ['==', ['get', 'zoneCode'], 'W'], '#002366',
             ['==', ['get', 'zoneCode'], 'BA'], '#192bc2',
             ['==', ['get', 'zoneCode'], 'BJ'], '#de0a26',
+            ['==', ['get', 'zoneCode'], 'SS'], '#192bc2',
             "#fff"
           ],
           'line-width': 2,
@@ -169,6 +207,39 @@ export default function MapView() {
     map.on('load', () => {
       addDistrict()
       map.getCanvas().style.cursor = 'auto';
+
+      map.addLayer({
+        id: "traffic-layer",
+        type: "line",
+        source: {
+          type: "geojson",
+          data: {
+            type: "Feature",
+            properties: {},
+            geometry: {
+              type: "LineString",
+              coordinates: [
+                [
+                  -9.015302333420587,
+                  114.60937499999999
+                ],
+                [
+                  -8.971897294083012,
+                  115.75195312500001
+                ]
+              ]
+            }
+          }
+        },
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round',
+        },
+        paint: {
+          'line-color': "#ff0000",
+          "line-width": 5
+        }
+      });
 
       map.on('mousemove', 'district-fills', (e) => {
         if (e.features?.length || 0 > 0) {

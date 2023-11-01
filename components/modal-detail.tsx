@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ModalProps {
   data: any;
@@ -19,10 +19,10 @@ export default function ModalDetail({
       <div className='rounded-lg bg-gray-100 p-4 max-w-full xs:max-w-[500px] w-[100%] space-y-5 shadow-lg'>
         <div className="flex space-x-10 justify-between">
           <button
-            className="text-blue-500 text-sm hover:text-blue-600 transition"
+            className="text-blue-500 text-sm hover:text-blue-600 transition flex items-center gap-1"
             onClick={() => setShowModal(false)}
           >
-            Back
+            <ChevronLeft className="w-4 h-4 text-blue-500 hover:text-blue-600" /> Back
           </button>
           <div className='flex flex-col items-center space-y-1'>
             <div className="font-semibold text-sm">Titik Koordinat</div>
@@ -63,7 +63,7 @@ export default function ModalDetail({
                 <div className="text-sm font-light py-2">Kegiatan yang diizinkan</div>
                 <div className="flex items-center">
                   <div className="text-[10px] w-6 h-6 rounded-full bg-gray-400 text-white flex items-center justify-center">
-                    {data?.zone?.activities?.length}
+                    {data?.zone?.activities?.filter((activity: any) => activity.pivot.x === false)?.length}
                   </div>
                   <ChevronRight className="w-5 h-5 text-gray-400" />
                 </div>
