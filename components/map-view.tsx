@@ -11,6 +11,9 @@ import { useEffect, useState } from 'react';
 import ModalDetail from './modal-detail';
 import ModalActivities from './modal-activities';
 import ModalDetailActivity from './modal-detail-activity';
+import masking from '@/data/masking.json';
+import badungDistrict from '@/data/badung-district.json';
+import baliDistrict from '@/data/bali-district.json';
 
 export default function MapView() {
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -36,8 +39,13 @@ export default function MapView() {
 
     // @ts-ignore
     let hoveredPolygonId = null;
+    // @ts-ignore
+    let hoveredPolygonIdDistrict = null;
 
-    const addLandPlotsLayer = () => {
+    map.on('load', () => {
+      map.getCanvas().style.cursor = 'auto';
+
+      // Land Plots
       map.addSource('landPlots', {
         'type': 'geojson',
         // @ts-ignore
@@ -81,13 +89,14 @@ export default function MapView() {
         type: 'fill',
         source: 'landPlots',
         layout: {},
+        minzoom: 14,
         paint: {
           'fill-color': [
             'case',
             ['==', ['get', 'zoneCode'], 'BA'], '#192bc2',
             ['==', ['get', 'zoneCode'], 'BJ'], '#de0a26',
             ['==', ['get', 'zoneCode'], 'SS'], '#192bc2',
-            '#fff'
+            '#4B0082'
           ],
           'fill-opacity': 0.5,
         },
@@ -96,6 +105,7 @@ export default function MapView() {
       map.addLayer({
         id: 'outline',
         type: 'line',
+        minzoom: 14,
         source: 'landPlots',
         layout: {},
         paint: {
@@ -109,45 +119,26 @@ export default function MapView() {
           'line-width': 2,
         },
       });
-    }
 
-    const addGeolocationLayer = () => {
-      map.addSource('geolocations', {
-        type: 'geojson',
+      // Masking
+      map.addSource('masking', {
+        type: "geojson",
         // @ts-ignore
-        data: {
-          type: 'Feature',
-          geometry: {
-            type: 'MultiPolygon',
-            coordinates: geolocations
-          },
-        },
-      });
+        data: masking
+      })
 
       map.addLayer({
-        id: 'geolocations',
-        type: 'fill',
-        source: 'geolocations',
+        id: "masking-layer",
+        type: "fill",
+        source: "masking",
         layout: {},
         paint: {
-          'fill-color': '#0080ff',
-          'fill-opacity': 0.2,
-        },
-      });
+          "fill-color": "#fff",
+          "fill-opacity": 1
+        }
+      })
 
-      map.addLayer({
-        id: 'outlineGeolocations',
-        type: 'line',
-        source: 'geolocations',
-        layout: {},
-        paint: {
-          'line-color': '#0080ff',
-          'line-width': 2,
-        },
-      });
-    }
-
-    const addDistrict = () => {
+      // District
       map.addSource('district', {
         type: "geojson",
         // @ts-ignore
@@ -159,8 +150,10 @@ export default function MapView() {
         type: "fill",
         source: "district",
         layout: {},
+        minzoom: 6,
+        maxzoom: 10,
         paint: {
-          "fill-color": "#fff",
+          "fill-color": "#4B0082",
           "fill-opacity": [
             "case",
             ["boolean", ["feature-state", 'hover'], false],
@@ -173,19 +166,55 @@ export default function MapView() {
       map.addLayer({
         id: "district-borders",
         type: "line",
+        minzoom: 6,
+        maxzoom: 10,
         source: "district",
         layout: {},
+        paint: {
+          "line-color": "#4B0082",
+          "line-width": 2
+        }
+      })
+
+      // Badung village
+      map.addSource('badung-district', {
+        type: "geojson",
+        // @ts-ignore
+        data: badungDistrict,
+      })
+
+      map.addLayer({
+        id: "badung-district-fills",
+        type: "fill",
+        source: "badung-district",
+        minzoom: 10,
+        maxzoom: 14,
+        layout: {},
+        paint: {
+          "fill-color": "#4B0082",
+          "fill-opacity": [
+            "case",
+            ["boolean", ["feature-state", 'hover'], false],
+            0.7,
+            0.5
+          ]
+        }
+      })
+
+      map.addLayer({
+        id: "badung-district-borders",
+        type: "line",
+        source: "badung-district",
+        layout: {},
+        maxzoom: 14,
+        minzoom: 10,
         paint: {
           "line-color": "#fff",
           "line-width": 2
         }
       })
-    }
 
-    map.on('load', () => {
-      addDistrict()
-      map.getCanvas().style.cursor = 'auto';
-
+      // Traffic
       map.addLayer({
         id: "traffic-layer",
         type: "line",
@@ -230,7 +259,7 @@ export default function MapView() {
             )
           }
           // @ts-ignore
-          hoveredPolygonId = e.features[0].properties.id_kabkota
+          hoveredPolygonId = e.features[0].id
           map.setFeatureState(
             { source: "district", id: hoveredPolygonId },
             { hover: true }
@@ -250,11 +279,51 @@ export default function MapView() {
         hoveredPolygonId = null;
       })
 
+      map.on('mousemove', 'badung-district-fills', (e) => {
+        if (e.features?.length || 0 > 0) {
+          // @ts-ignore
+          if (hoveredPolygonIdDistrict !== null) {
+            map.setFeatureState(
+              // @ts-ignore
+              { source: "badung-district", id: hoveredPolygonIdDistrict },
+              { hover: false }
+            )
+          }
+
+          // @ts-ignore
+          hoveredPolygonIdDistrict = e.features[0].id
+          map.setFeatureState(
+            { source: "badung-district", id: hoveredPolygonIdDistrict },
+            { hover: true }
+          )
+        }
+      })
+
+      map.on('mouseleave', 'badung-district-fills', () => {
+        // @ts-ignore
+        if (hoveredPolygonIdDistrict !== null) {
+          map.setFeatureState(
+            // @ts-ignore
+            { source: 'badung-district', id: hoveredPolygonIdDistrict },
+            { hover: false }
+          )
+        }
+        hoveredPolygonIdDistrict = null;
+      })
+
       map.on('mouseenter', 'landPlots', function () {
         map.getCanvas().style.cursor = 'pointer';
       });
 
       map.on('mouseleave', 'landPlots', function () {
+        map.getCanvas().style.cursor = 'auto';
+      });
+
+      map.on('mouseenter', 'badung-district-fills', function () {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+
+      map.on('mouseleave', 'badung-district-fills', function () {
         map.getCanvas().style.cursor = 'auto';
       });
 
@@ -266,21 +335,24 @@ export default function MapView() {
         map.getCanvas().style.cursor = 'auto';
       });
 
-      map.on('dragstart', function () {
-        map.getCanvas().style.cursor = 'grabbing';
-      });
-
-      map.on('dragend', function () {
-        map.getCanvas().style.cursor = 'auto';
-      });
-
       map.on('click', 'district-fills', function (e: any) {
         const clickedFeature = e.features[0];
 
         if (clickedFeature) {
           map.flyTo({
             center: e.lngLat,
-            zoom: 14,
+            zoom: 10,
+          });
+        }
+      });
+
+      map.on('click', 'badung-district-fills', function (e: any) {
+        const clickedFeature = e.features[0];
+
+        if (clickedFeature) {
+          map.flyTo({
+            center: e.lngLat,
+            zoom: 15,
           });
         }
       });
@@ -306,100 +378,6 @@ export default function MapView() {
           duration: 2000
         });
       })
-
-      map.on('zoom', () => {
-        const currentZoom = map.getZoom();
-
-        if (currentZoom >= 14) {
-          if (!map.getLayer('landPlots')) {
-            addLandPlotsLayer()
-          }
-          if (map.getLayer('outlineGeolocations')) {
-            map.removeLayer('outlineGeolocations');
-          }
-          if (map.getSource('outlineGeolocations')) {
-            map.removeSource('outlineGeolocations');
-          }
-          if (map.getLayer('geolocations')) {
-            map.removeLayer('geolocations');
-          }
-          if (map.getSource('geolocations')) {
-            map.removeSource('geolocations');
-          }
-        }
-        else if (currentZoom > 9 && currentZoom <= 14) {
-          if (map.getLayer('district-borders')) {
-            map.removeLayer('district-borders')
-          }
-          if (map.getSource('district-borders')) {
-            map.removeSource('district-borders');
-          }
-          if (map.getLayer('district-fills')) {
-            map.removeLayer('district-fills')
-          }
-          if (map.getSource('district-fills')) {
-            map.removeSource('district-fills');
-          }
-          if (map.getLayer('outline')) {
-            map.removeLayer('outline')
-          }
-          if (map.getSource('outline')) {
-            map.removeSource('outline');
-          }
-          if (map.getLayer('landPlots')) {
-            map.removeLayer('landPlots')
-          }
-          if (map.getSource('landPlots')) {
-            map.removeSource('landPlots');
-          }
-          if (!map.getLayer('geolocations')) {
-            addGeolocationLayer()
-          }
-        }
-        else if (currentZoom < 9) {
-          if (!map.getLayer("district-fills")) {
-            map.addLayer({
-              id: "district-fills",
-              type: "fill",
-              source: "district",
-              layout: {},
-              paint: {
-                "fill-color": "#fff",
-                "fill-opacity": [
-                  "case",
-                  ["boolean", ["feature-state", 'hover'], false],
-                  0.7,
-                  0.5
-                ]
-              }
-            })
-
-            map.addLayer({
-              id: "district-borders",
-              type: "line",
-              source: "district",
-              layout: {},
-              paint: {
-                "line-color": "#fff",
-                "line-width": 2
-              }
-            })
-          }
-
-          if (map.getLayer('outlineGeolocations')) {
-            map.removeLayer('outlineGeolocations');
-          }
-          if (map.getSource('outlineGeolocations')) {
-            map.removeSource('outlineGeolocations');
-          }
-          if (map.getLayer('geolocations')) {
-            map.removeLayer('geolocations');
-          }
-          if (map.getSource('geolocations')) {
-            map.removeSource('geolocations');
-          }
-        }
-      });
     });
 
     return () => map.remove();
