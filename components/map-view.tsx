@@ -1,23 +1,17 @@
 "use client"
 
+import badungDistrict from '@/data/badung-district.json';
 import badung from '@/data/badung.json';
-import geolocations from '@/data/geolocations.json';
-import landPlots from '@/data/landPlots.json';
+import extendedMasking from '@/data/extended-masking.json';
 import landPlots2 from '@/data/land-plots.json';
+import masking from '@/data/masking.json';
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import mapboxgl, { Map } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useEffect, useState } from 'react';
-import ModalDetail from './modal-detail';
 import ModalActivities from './modal-activities';
-import ModalDetailActivity from './modal-detail-activity';
-import masking from '@/data/masking.json';
-import badungDistrict from '@/data/badung-district.json';
-import baliDistrict from '@/data/bali-district.json';
-import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import extendedMasking from '@/data/extended-masking.json';
-import CustomPopup from './custom-popup';
-import { ReactDOM } from 'react';
+import ModalDetail from './modal-detail';
 
 export default function MapView() {
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -401,7 +395,8 @@ export default function MapView() {
 
       // @ts-ignore
       landPlots2.forEach((landPlot) => {
-        const center: [number, number] = parseFloat(landPlot.center.lat) < 0 ? [
+        // @ts-ignore
+        const center = parseFloat(landPlot.center.lat) < 0 ? [
           parseFloat(landPlot.center.lng),
           landPlot.center.lat,
         ] : [landPlot.center.lat, parseFloat(landPlot.center.lng)]
@@ -413,6 +408,7 @@ export default function MapView() {
           closeOnClick: false,
           className: "custom-popup",
         })
+          // @ts-ignore
           .setLngLat(center)
           .setHTML(`
             <div class="custom-popup-container">
