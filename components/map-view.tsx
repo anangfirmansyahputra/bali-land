@@ -5,7 +5,7 @@ import geolocations from '@/data/geolocations.json';
 import landPlots from '@/data/landPlots.json';
 import landPlots2 from '@/data/land-plots.json';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
-import mapboxgl from 'mapbox-gl';
+import mapboxgl, { Map } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useEffect, useState } from 'react';
 import ModalDetail from './modal-detail';
@@ -14,6 +14,10 @@ import ModalDetailActivity from './modal-detail-activity';
 import masking from '@/data/masking.json';
 import badungDistrict from '@/data/badung-district.json';
 import baliDistrict from '@/data/bali-district.json';
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
+import extendedMasking from '@/data/extended-masking.json';
+import CustomPopup from './custom-popup';
+import { ReactDOM } from 'react';
 
 export default function MapView() {
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -21,12 +25,14 @@ export default function MapView() {
   const [showDetailActivity, setShowDetailActivity] = useState<boolean>(false);
   const [data, setData] = useState(null);
 
+  const draw = new MapboxDraw();
+
   useEffect(() => {
     mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
 
     let marker = new mapboxgl.Marker();
 
-    const map = new mapboxgl.Map({
+    const map: Map = new mapboxgl.Map({
       container: "map",
       style: 'mapbox://styles/mapbox/satellite-streets-v12',
       center: [115.087004, -8.337301],
@@ -248,6 +254,20 @@ export default function MapView() {
         }
       });
 
+      map.addLayer({
+        id: "masking-extended",
+        type: "fill",
+        source: {
+          type: "geojson",
+          // @ts-ignore
+          data: extendedMasking
+        },
+        layout: {},
+        paint: {
+          "fill-color": "#fff",
+        }
+      })
+
       map.on('mousemove', 'district-fills', (e) => {
         if (e.features?.length || 0 > 0) {
           // @ts-ignore
@@ -377,6 +397,51 @@ export default function MapView() {
           zoom: 17,
           duration: 2000
         });
+      })
+
+      // @ts-ignore
+      landPlots2.forEach((landPlot) => {
+        const center: [number, number] = parseFloat(landPlot.center.lat) < 0 ? [
+          parseFloat(landPlot.center.lng),
+          landPlot.center.lat,
+        ] : [landPlot.center.lat, parseFloat(landPlot.center.lng)]
+
+        const randomPrice = Math.floor(Math.random() * (1000 - 150 + 1)) + 150
+
+        const popup = new mapboxgl.Popup({
+          closeButton: false,
+          closeOnClick: false,
+          className: "custom-popup",
+        })
+          .setLngLat(center)
+          .setHTML(`
+            <div class="custom-popup-container">
+              <div>$${randomPrice}K</div>
+              <div class="land-card">
+                <img src="/assets/vila.jpg" class="land-card-img" />
+                <div class="land-card-content">
+                  <div>
+                    <div>&${randomPrice},000</div>
+                    <div>123</div>
+                  </div>
+                  <div>Cozy 2 bedroom villa</div>
+                  <div>
+                    <div>
+                      <div>
+                      </div>
+                      <div>0 1 2 3 4 5</div>
+                    </div>
+                    <div>
+                      <div>
+                      </div>
+                      <div>0 1 2 3 4 5</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `)
+          .addTo(map)
       })
     });
 

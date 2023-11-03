@@ -1,3 +1,88 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --color-white: #fff;
+  --color-black: #000;
+  --color-accent-1: #3854F5;
+  --inOutQuart: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.mapboxgl-popup-content {
+  padding: 0.3rem 1rem !important;
+  cursor: pointer;
+  margin: auto;
+  color: var(--color-black);
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 10px !important;
+  max-width: 74px !important;
+  transition: all 0.2s;
+}
+
+.mapboxgl-popup-content:hover {
+  background-color: var(--color-accent-1);
+  color: var(--color-white);
+  z-index: 1000 !important;
+}
+
+.mapboxgl-popup-content:hover ~ .custom-popup-detail {
+  display: block !important;
+}
+
+
+.custom-popup {
+  transition: all .2s;
+  background: transparent !important;
+}
+
+.custom-popup:hover {
+  z-index: 1000 !important;
+  border-color: var(--color-accent-1);
+}
+
+.custom-popup:hover .mapboxgl-popup-tip {
+  border-top-color: var(--color-accent-1) !important;
+}
+
+
+.custom-popup-container {
+  position: relative
+}
+
+.land-card {
+  display: none !important;
+  color: var(--color-black);
+  position: absolute;
+  top: 50px;
+  background-color: var(--color-white);
+  padding: 0.5rem;
+  border-radius: 1rem;
+  width: 162px !important;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  left: -100%;
+
+}
+
+.mapboxgl-popup-content:hover .land-card {
+  /* display: flex !important; */
+  /* width: 400px !important; */
+  background-color: red !important;
+}
+
+.land-card-img {
+  aspect-ratio: 1 / 1;
+  height: 150px;
+  border-radius: 1rem;
+  object-fit: cover;
+}
+
+.land-card-content {
+  display: none !important;
+}
+
+/* New */
+.custom-popup-detail {
+  display: none !important;
+}
