@@ -438,6 +438,15 @@ export default function MapView() {
             </div>
           `)
           .addTo(map)
+
+        popup.getElement().addEventListener('click', function () {
+          map.flyTo({
+            // @ts-ignore
+            center: center,
+            zoom: 18,
+          });
+        })
+
       })
     });
 
