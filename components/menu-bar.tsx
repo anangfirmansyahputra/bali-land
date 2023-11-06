@@ -3,6 +3,14 @@ import {
   SlidersHorizontal,
   ChevronDown
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Menubar() {
   return (
@@ -11,7 +19,19 @@ export default function Menubar() {
         <div className="bg-gray-100 p-3 flex-1 rounded-lg flex items-center justify-between">
           <h1 className="text-slate-800 text-2xl font-extrabold">Island.Properties</h1>
           <div>
-            <Button variant={"ghost"} className="font-bold">Service <ChevronDown size={20} className="ml-1" /></Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button variant={"ghost"} className="font-bold">Service <ChevronDown size={20} className="ml-1" /></Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="mt-3">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Profile</DropdownMenuItem>
+                <DropdownMenuItem>Billing</DropdownMenuItem>
+                <DropdownMenuItem>Team</DropdownMenuItem>
+                <DropdownMenuItem>Subscription</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button className="font-bold">Add to your property</Button>
           </div>
         </div>
