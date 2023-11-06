@@ -12,6 +12,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { useEffect, useState } from 'react';
 import ModalActivities from './modal-activities';
 import ModalDetail from './modal-detail';
+import Menubar from './menu-bar';
 
 export default function MapView() {
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -403,49 +404,61 @@ export default function MapView() {
 
         const randomPrice = Math.floor(Math.random() * (1000 - 150 + 1)) + 150
 
-        const popup = new mapboxgl.Popup({
-          closeButton: false,
-          closeOnClick: false,
-          className: "custom-popup",
+        const customMarker = document.createElement('div');
+        customMarker.className = "custom-marker";
+        customMarker.innerHTML = `$${randomPrice}K`;
+
+        const marker = new mapboxgl.Marker({
+          element: customMarker,
+          anchor: "bottom"
         })
           // @ts-ignore
           .setLngLat(center)
-          .setHTML(`
-            <div class="custom-popup-container">
-              <div>$${randomPrice}K</div>
-              <div class="land-card">
-                <img src="/assets/vila.jpg" class="land-card-img" />
-                <div class="land-card-content">
-                  <div>
-                    <div>&${randomPrice},000</div>
-                    <div>123</div>
-                  </div>
-                  <div>Cozy 2 bedroom villa</div>
-                  <div>
-                    <div>
-                      <div>
-                      </div>
-                      <div>0 1 2 3 4 5</div>
-                    </div>
-                    <div>
-                      <div>
-                      </div>
-                      <div>0 1 2 3 4 5</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          `)
           .addTo(map)
 
-        popup.getElement().addEventListener('click', function () {
-          map.flyTo({
-            // @ts-ignore
-            center: center,
-            zoom: 18,
-          });
-        })
+        // const popup = new mapboxgl.Popup({
+        //   closeButton: false,
+        //   closeOnClick: false,
+        //   className: "custom-popup",
+        // })
+        //   // @ts-ignore
+        //   .setLngLat(center)
+        //   .setHTML(`
+        //     <div class="custom-popup-container">
+        //       <div>$${randomPrice}K</div>
+        //       <div class="land-card">
+        //         <img src="/assets/vila.jpg" class="land-card-img" />
+        //         <div class="land-card-content">
+        //           <div>
+        //             <div>&${randomPrice},000</div>
+        //             <div>123</div>
+        //           </div>
+        //           <div>Cozy 2 bedroom villa</div>
+        //           <div>
+        //             <div>
+        //               <div>
+        //               </div>
+        //               <div>0 1 2 3 4 5</div>
+        //             </div>
+        //             <div>
+        //               <div>
+        //               </div>
+        //               <div>0 1 2 3 4 5</div>
+        //             </div>
+        //           </div>
+        //         </div>
+        //       </div>
+        //     </div>
+        //   `)
+        //   .addTo(map)
+
+        // popup.getElement().addEventListener('click', function () {
+        //   map.flyTo({
+        //     // @ts-ignore
+        //     center: center,
+        //     zoom: 18,
+        //   });
+        // })
 
       })
     });
@@ -455,7 +468,7 @@ export default function MapView() {
 
   return (
     <div className='relative w-full h-screen'>
-      {showModal && (
+      {/* {showModal && (
         <ModalDetail
           data={data}
           setShowModal={setShowModal}
@@ -468,13 +481,14 @@ export default function MapView() {
           setShowActivities={setShowActivities}
           setShowDetailActivity={setShowDetailActivity}
         />
-      )}
+      )} */}
       {/* {showDetailActivity && (
         <ModalDetailActivity
           data={data}
           setShowDetailActivity={setShowDetailActivity}
         />
       )} */}
+      <Menubar />
       <div id='map' style={{ width: '100vw', height: '100vh' }}></div>
     </div>
   );

@@ -10,14 +10,19 @@
   },
   "dependencies": {
     "@mapbox/mapbox-gl-draw": "^1.4.3",
+    "@radix-ui/react-slot": "^1.0.2",
     "@types/mapbox__mapbox-gl-draw": "^1.4.5",
     "@types/mapbox-gl": "^2.7.17",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
     "lucide-react": "^0.291.0",
     "mapbox-gl": "^2.15.0",
     "next": "14.0.0",
     "react": "^18",
     "react-dom": "^18",
-    "react-map-gl": "^7.1.6"
+    "react-map-gl": "^7.1.6",
+    "tailwind-merge": "^2.0.0",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@types/node": "^20",
