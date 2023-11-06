@@ -43,7 +43,7 @@ export default function InfoPanel({
         <CardContent className="space-y-2 overflow-y-auto">
           {/* @ts-ignore */}
           {landPlot.map((landPlot) => {
-            const center: [number, number] = parseFloat(landPlot.center.lat) < 0 ? [
+            const center = parseFloat(landPlot.center.lat) < 0 ? [
               parseFloat(landPlot.center.lng),
               landPlot.center.lat,
             ] : [landPlot.center.lat, parseFloat(landPlot.center.lng)]
@@ -53,6 +53,7 @@ export default function InfoPanel({
               <div
                 key={landPlot.id}
                 className="flex space-x-2 w-full border rounded-lg p-2 overflow-hidden items-center cursor-pointer transition-all hover:border-primary"
+                // @ts-ignore
                 onClick={() => handleFly(center)}
               >
                 <div className="aspect-square h-[150px] relative overflow-hidden">
