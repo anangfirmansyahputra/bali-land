@@ -53,6 +53,43 @@
     --ring: 224.3 76.3% 48%;
   }
 }
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #397524 #DFE9EB;
+}
+
+/* Chrome, Edge and Safari */
+*::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  border-radius: 5px;
+  background-color: #DFE9EB;
+}
+
+*::-webkit-scrollbar-track:hover {
+  background-color: #B8C0C2;
+}
+
+*::-webkit-scrollbar-track:active {
+  background-color: #B8C0C2;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  background-color: hsl(var(--primary));
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--primary));
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background-color: hsl(var(--primary));
+}
  
 @layer base {
   * {
@@ -166,4 +203,18 @@
   background-color: #3854F5;
   color: var(--color-white);
   z-index: 999;
+}
+
+.fadeIn {
+  animation: fadeInAnimation 0.1s;
+}
+
+@keyframes fadeInAnimation {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }

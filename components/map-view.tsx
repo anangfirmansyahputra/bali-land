@@ -10,22 +10,17 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import mapboxgl, { Map } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useEffect, useState } from 'react';
-import ModalActivities from './modal-activities';
-import ModalDetail from './modal-detail';
+import InfoPanel from './info-panel';
 import Menubar from './menu-bar';
 
 export default function MapView() {
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const [showActivities, setShowActivities] = useState<boolean>(false)
-  const [showDetailActivity, setShowDetailActivity] = useState<boolean>(false);
-  const [data, setData] = useState(null);
+  const [instanceMap, setInstanceMap] = useState<Map>();
+  const [showInfoPanel, setShowInfoPanel] = useState<Boolean>(true)
 
   const draw = new MapboxDraw();
 
   useEffect(() => {
     mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
-
-    let marker = new mapboxgl.Marker();
 
     const map: Map = new mapboxgl.Map({
       container: "map",
@@ -37,6 +32,8 @@ export default function MapView() {
         [116.2, -8.2]
       ],
     });
+
+    setInstanceMap(map)
 
     // @ts-ignore
     let hoveredPolygonId = null;
@@ -374,22 +371,13 @@ export default function MapView() {
 
       map.on('click', 'landPlots', (e: any) => {
         const information = JSON.parse(e.features[0].properties.data);
-        setShowModal(true);
-        setData(information);
-
-
-        marker.setLngLat(information.center.lat > 90 ? {
-          lat: information.center.lng,
-          lng: information.center.lat,
-        } : information.center)
-          .addTo(map)
 
         map.flyTo({
           center: information.center.lat > 90 ? {
             lat: information.center.lng,
             lng: information.center.lat,
           } : information.center,
-          zoom: 17,
+          zoom: 18,
           duration: 2000
         });
       })
@@ -452,13 +440,13 @@ export default function MapView() {
         //   `)
         //   .addTo(map)
 
-        // popup.getElement().addEventListener('click', function () {
-        //   map.flyTo({
-        //     // @ts-ignore
-        //     center: center,
-        //     zoom: 18,
-        //   });
-        // })
+        marker.getElement().addEventListener('click', function () {
+          map.flyTo({
+            // @ts-ignore
+            center: center,
+            zoom: 18,
+          });
+        })
 
       })
     });
@@ -468,27 +456,17 @@ export default function MapView() {
 
   return (
     <div className='relative w-full h-screen'>
-      {/* {showModal && (
-        <ModalDetail
-          data={data}
-          setShowModal={setShowModal}
-          setShowActivities={setShowActivities}
+      <Menubar
+        setShowInfoPanel={setShowInfoPanel}
+      />
+      {showInfoPanel && (
+        <InfoPanel
+          // @ts-ignore
+          map={instanceMap}
+          isActive={showInfoPanel}
+          setShowInfoPanel={setShowInfoPanel}
         />
       )}
-      {showActivities && (
-        <ModalActivities
-          data={data}
-          setShowActivities={setShowActivities}
-          setShowDetailActivity={setShowDetailActivity}
-        />
-      )} */}
-      {/* {showDetailActivity && (
-        <ModalDetailActivity
-          data={data}
-          setShowDetailActivity={setShowDetailActivity}
-        />
-      )} */}
-      <Menubar />
       <div id='map' style={{ width: '100vw', height: '100vh' }}></div>
     </div>
   );
