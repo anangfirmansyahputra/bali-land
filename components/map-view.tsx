@@ -218,7 +218,8 @@ export default function MapView() {
 
     if (Array.isArray(landPlots2)) {
       landPlots2.forEach((landPlot) => {
-        const center: LngLatLike = parseFloat(landPlot.center.lat) < 0 ? [
+        // @ts-ignore
+        const center = parseFloat(landPlot.center.lat) < 0 ? [
           parseFloat(landPlot.center.lng),
           landPlot.center.lat,
         ] : [landPlot.center.lat, parseFloat(landPlot.center.lng)]
@@ -233,6 +234,7 @@ export default function MapView() {
           element: customMarker,
           anchor: "bottom"
         })
+          // @ts-ignore
           .setLngLat(center)
           .addTo(map)
 
