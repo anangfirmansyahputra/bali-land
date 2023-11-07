@@ -12,11 +12,12 @@ import { useEffect, useState } from 'react';
 import InfoPanel from './info-panel';
 import Loading from './loading';
 import Menubar from './menu-bar';
+import FilterSheet from './filter-sheet';
 
 export default function MapView() {
   const [instanceMap, setInstanceMap] = useState<Map>();
-  const [showInfoPanel, setShowInfoPanel] = useState<Boolean>(true)
-  const [isLoading, setIsLoading] = useState<Boolean>(true)
+  const [showInfoPanel, setShowInfoPanel] = useState<boolean>(true)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
   // @ts-ignore
   let hoveredPolygonIdDistrict = null;
 
@@ -438,14 +439,12 @@ export default function MapView() {
         <Menubar
           setShowInfoPanel={setShowInfoPanel}
         />
-        {showInfoPanel && (
-          <InfoPanel
-            // @ts-ignore
-            map={instanceMap}
-            isActive={showInfoPanel}
-            setShowInfoPanel={setShowInfoPanel}
-          />
-        )}
+        <InfoPanel
+          // @ts-ignore
+          map={instanceMap}
+          isActive={showInfoPanel}
+          setShowInfoPanel={setShowInfoPanel}
+        />
         <div id='map' style={{ width: '100vw', height: '100vh' }}></div>
       </div>
     </>

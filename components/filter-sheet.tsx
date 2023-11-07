@@ -12,6 +12,7 @@ import { Slider } from "@/components/ui/slider";
 import { useState } from 'react';
 import { Input } from './ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { cn } from '../lib/utils';
 
 const propertyTypes = [
   {
@@ -85,7 +86,7 @@ export default function FilterSheet() {
             {propertyTypes.map((item) => (
               <div
                 key={item.id}
-                className='border p-3 rounded-lg cursor-pointer hover:border-black space-y-3 transition-all'
+                className={cn("border p-3 rounded-lg cursor-pointer hover:border-black space-y-3 transition-all", type === item.value && "border-black")}
                 onClick={() => setType(item.value)}
               >
                 <h4 className='text-base font-medium'>{item.name}</h4>

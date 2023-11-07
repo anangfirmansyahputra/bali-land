@@ -1,9 +1,3 @@
-import { Button } from "./ui/button";
-import {
-  SlidersHorizontal,
-  ChevronDown,
-  Info
-} from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,10 +6,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  ChevronDown
+} from 'lucide-react';
 import FilterSheet from "./filter-sheet";
+import { Button } from "./ui/button";
 
 interface MenubarProps {
-  setShowInfoPanel: React.Dispatch<React.SetStateAction<Boolean>>;
+  setShowInfoPanel: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function Menubar({
@@ -24,10 +22,7 @@ export default function Menubar({
 
   return (
     <div className="absolute z-[50] w-full">
-      <div className="m-3 flex items-center gap-5 justify-end sm:justify-between h-full">
-        <Button variant={"secondary"} className="rounded-full sm:hidden" size={"icon"} onClick={() => setShowInfoPanel(true)}>
-          <Info />
-        </Button>
+      <div className="m-3 hidden sm:flex items-center gap-5 justify-end sm:justify-between h-full">
         <div className="shadow-xl bg-white p-3 flex-1 rounded-lg hidden sm:flex items-center justify-between">
           <h1 className="text-slate-800 text-2xl font-extrabold">Island.Properties</h1>
           <div>
@@ -49,6 +44,9 @@ export default function Menubar({
             <Button className="font-bold">Add to your property</Button>
           </div>
         </div>
+        <FilterSheet />
+      </div>
+      <div className="w-fit fixed right-3 top-6 sm:hidden">
         <FilterSheet />
       </div>
     </div>
