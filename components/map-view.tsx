@@ -10,8 +10,8 @@ import mapboxgl, { Map } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useEffect, useState } from 'react';
 import InfoPanel from './info-panel';
-import Menubar from './menu-bar';
 import Loading from './loading';
+import Menubar from './menu-bar';
 
 export default function MapView() {
   const [instanceMap, setInstanceMap] = useState<Map>();
