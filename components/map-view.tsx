@@ -123,7 +123,15 @@ export default function MapView() {
         features: landPlots2.map((landPlot) => {
           const zoneCode = landPlot.territorials.geom[0].zone.code;
           const territorials = JSON.parse(landPlot?.territorials?.geom?.[0]?.geojson);
-          const certificate = JSON.parse(landPlot?.certificate)
+
+          let certificate;
+
+          if (landPlot?.certificate) {
+            certificate = JSON.parse(landPlot.certificate);
+          } else {
+            certificate = null; // Atau berikan nilai default lain jika diperlukan
+          }
+
           let polygon;
 
           if (zoneCode === "BJ" || zoneCode === "BA" || zoneCode === "SS") {
