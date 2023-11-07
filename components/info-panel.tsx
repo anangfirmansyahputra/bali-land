@@ -43,7 +43,7 @@ export default function InfoPanel({
         <CardContent className="space-y-2 overflow-y-auto">
           {/* @ts-ignore */}
           {landPlot.map((landPlot) => {
-            const center: [number, number] = parseFloat(landPlot.center.lat) < 0 ? [
+            const center = parseFloat(landPlot.center.lat) < 0 ? [
               parseFloat(landPlot.center.lng),
               landPlot.center.lat,
             ] : [landPlot.center.lat, parseFloat(landPlot.center.lng)]
@@ -53,14 +53,15 @@ export default function InfoPanel({
               <div
                 key={landPlot.id}
                 className="flex space-x-2 w-full border rounded-lg p-2 overflow-hidden items-center cursor-pointer transition-all hover:border-primary"
+                // @ts-ignore
                 onClick={() => handleFly(center)}
               >
-                <div className="aspect-square h-[150px] relative overflow-hidden">
+                <div className="aspect-square h-[100px] sm:h-[150px] relative overflow-hidden">
                   <Image src={"/assets/vila.jpg"} alt="vila" fill className="object-cover" />
                 </div>
                 <div className="space-y-1 flex-1 truncate text-ellipsis  overflow-y-auto">
-                  <h1 className="text-xl">Tampaksiring, Indonesia</h1>
-                  <p className="text-sm text-slate-600">Stay with Ari * Hosting for 7 years</p>
+                  <h1 className="text-base sm:text-xl">Tampaksiring, Indonesia</h1>
+                  <p className="text-xs sm:text-sm text-slate-600">Stay with Ari * Hosting for 7 years</p>
                   <div className="space-x-1">
                     <Badge variant={"outline"}>
                       Vila
@@ -69,7 +70,7 @@ export default function InfoPanel({
                       ${randomPrice}K
                     </Badge>
                   </div>
-                  <p className="text-sm text-slate-600">Lorem ipsum d sit amet consectetur, adipisicing elit. Officia illo asperiores quod doloremque sit dolorem tempora molestiae eaque. Rerum vitae animi deserunt officiis praesentium laboriosam, architecto placeat quasi, minima aliquam ducimus a nobis recusandae quos? A eligendi neque modi voluptatum deleniti asperiores, ex dolores id, corporis sapiente quaerat minima veniam.</p>
+                  <p className="text-xs sm:text-sm text-slate-600">Lorem ipsum d sit amet consectetur, adipisicing elit. Officia illo asperiores quod doloremque sit dolorem tempora molestiae eaque. Rerum vitae animi deserunt officiis praesentium laboriosam, architecto placeat quasi, minima aliquam ducimus a nobis recusandae quos? A eligendi neque modi voluptatum deleniti asperiores, ex dolores id, corporis sapiente quaerat minima veniam.</p>
                 </div>
               </div>
             )
