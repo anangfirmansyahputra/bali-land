@@ -149,7 +149,7 @@ export default function MapView() {
           return null;
         }).filter((feature: any) => feature !== null)
       }
-    } as mapboxgl.GeoJSONSourceRaw);
+    });
 
     map.addLayer({
       id: 'landPlots',
