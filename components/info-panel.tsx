@@ -51,7 +51,7 @@ export default function InfoPanel({
         <CardContent className={`space-y-2 overflow-y-auto`}>
           {/* @ts-ignore */}
           {landPlot.map((landPlot) => {
-            const center: [number, number] = parseFloat(landPlot.center.lat) < 0 ? [
+            const center: [any, any] = parseFloat(landPlot.center.lat) < 0 ? [
               parseFloat(landPlot.center.lng),
               landPlot.center.lat,
             ] : [landPlot.center.lat, parseFloat(landPlot.center.lng)]
