@@ -5,14 +5,12 @@ import extendedMasking from '@/data/extended-masking.json';
 import landPlots2 from '@/data/land-plots.json';
 import masking from '@/data/masking.json';
 import supabase from '@/supabase';
-import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
-import mapboxgl, { Map } from 'mapbox-gl';
+import mapboxgl, { LngLatLike, Map } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useEffect, useState } from 'react';
 import InfoPanel from './info-panel';
 import Loading from './loading';
 import Menubar from './menu-bar';
-import FilterSheet from './filter-sheet';
 
 export default function MapView() {
   const [instanceMap, setInstanceMap] = useState<Map>();
@@ -24,15 +22,13 @@ export default function MapView() {
   const getDataBadung = async (map: Map) => {
     const { data: badung } = await supabase.from('badung_districts').select();
 
-    // Badung village
     map.addSource('badung-district', {
       type: "geojson",
       data: {
         type: "FeatureCollection",
-        // @ts-ignore
         features: badung,
       }
-    })
+    } as mapboxgl.GeoJSONSourceRaw)
 
     map.addLayer({
       id: "badung-district-fills",
@@ -121,14 +117,12 @@ export default function MapView() {
     // Land Plots
     map.addSource('landPlots', {
       'type': 'geojson',
-      // @ts-ignore
       data: {
         type: "FeatureCollection",
         // @ts-ignore
         features: landPlots2.map((landPlot) => {
           const zoneCode = landPlot.territorials.geom[0].zone.code;
           const territorials = JSON.parse(landPlot?.territorials?.geom?.[0]?.geojson);
-          // @ts-ignore
           const certificate = JSON.parse(landPlot?.certificate)
           let polygon;
 
@@ -155,7 +149,7 @@ export default function MapView() {
           return null;
         }).filter((feature: any) => feature !== null)
       }
-    });
+    } as mapboxgl.GeoJSONSourceRaw);
 
     map.addLayer({
       id: 'landPlots',
@@ -214,37 +208,36 @@ export default function MapView() {
       });
     })
 
-    // @ts-ignore
-    landPlots2.forEach((landPlot) => {
-      // @ts-ignore
-      const center = parseFloat(landPlot.center.lat) < 0 ? [
-        parseFloat(landPlot.center.lng),
-        landPlot.center.lat,
-      ] : [landPlot.center.lat, parseFloat(landPlot.center.lng)]
+    if (Array.isArray(landPlots2)) {
+      landPlots2.forEach((landPlot) => {
+        const center: LngLatLike = parseFloat(landPlot.center.lat) < 0 ? [
+          parseFloat(landPlot.center.lng),
+          landPlot.center.lat,
+        ] : [landPlot.center.lat, parseFloat(landPlot.center.lng)]
 
-      const randomPrice = Math.floor(Math.random() * (1000 - 150 + 1)) + 150
+        const randomPrice = Math.floor(Math.random() * (1000 - 150 + 1)) + 150
 
-      const customMarker = document.createElement('div');
-      customMarker.className = "custom-marker";
-      customMarker.innerHTML = `$${randomPrice}K`;
+        const customMarker = document.createElement('div');
+        customMarker.className = "custom-marker";
+        customMarker.innerHTML = `$${randomPrice}K`;
 
-      const marker = new mapboxgl.Marker({
-        element: customMarker,
-        anchor: "bottom"
+        const marker = new mapboxgl.Marker({
+          element: customMarker,
+          anchor: "bottom"
+        })
+          .setLngLat(center)
+          .addTo(map)
+
+        marker.getElement().addEventListener('click', function () {
+          map.flyTo({
+            // @ts-ignore
+            center: center,
+            zoom: 18,
+          });
+        })
+
       })
-        // @ts-ignore
-        .setLngLat(center)
-        .addTo(map)
-
-      marker.getElement().addEventListener('click', function () {
-        map.flyTo({
-          // @ts-ignore
-          center: center,
-          zoom: 18,
-        });
-      })
-
-    })
+    }
   }
 
   useEffect(() => {

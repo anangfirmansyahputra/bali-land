@@ -27,7 +27,7 @@ export default function Menubar({
           <h1 className="text-slate-800 text-2xl font-extrabold">Island.Properties</h1>
           <div>
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+              <DropdownMenuTrigger asChild className="mr-2">
                 <Button variant={"ghost"} className="font-bold">
                   Service <ChevronDown size={20} className="ml-1" />
                 </Button>
