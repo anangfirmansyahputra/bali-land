@@ -64,7 +64,7 @@ export default function ZoneFilter({ setZoneActive, map }: ZoneFilterProps) {
 
   return (
     <Dialog>
-      <DialogTrigger asChild className="hidden sm:block">
+      <DialogTrigger asChild className="hidden sm:inline">
         <Button variant={"ghost"}>Zone Filter</Button>
       </DialogTrigger>
       <DialogTrigger className="block sm:hidden">
