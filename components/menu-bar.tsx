@@ -32,7 +32,7 @@ export default function Menubar({
     <div className="absolute z-[50] w-full">
       <div className="m-3 hidden sm:flex items-center gap-5 justify-end sm:justify-between h-full">
         <div className="shadow-xl bg-white p-3 flex-1 rounded-lg hidden sm:flex items-center justify-between">
-          <h1 className="text-slate-800 text-2xl font-extrabold">Island.Properties</h1>
+          <h1 className="text-slate-800 text-base lg:text-2xl font-extrabold">Island.Properties</h1>
           <div>
             <ZoneFilter setZoneActive={setZoneActive} map={map}  />
             <DropdownMenu>
