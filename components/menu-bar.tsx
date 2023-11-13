@@ -11,13 +11,21 @@ import {
 } from 'lucide-react';
 import FilterSheet from "./filter-sheet";
 import { Button } from "./ui/button";
+import ZoneFilter from './zone-filter';
+import { Map } from "mapbox-gl";
 
 interface MenubarProps {
   setShowInfoPanel: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowZoneFilter: React.Dispatch<React.SetStateAction<boolean>>;
+  setZoneActive: React.Dispatch<React.SetStateAction<string>>;
+  map: Map
 }
 
 export default function Menubar({
-  setShowInfoPanel
+  setShowInfoPanel,
+  setShowZoneFilter,
+  setZoneActive,
+  map
 }: MenubarProps) {
 
   return (
@@ -26,6 +34,7 @@ export default function Menubar({
         <div className="shadow-xl bg-white p-3 flex-1 rounded-lg hidden sm:flex items-center justify-between">
           <h1 className="text-slate-800 text-2xl font-extrabold">Island.Properties</h1>
           <div>
+            <ZoneFilter setZoneActive={setZoneActive} map={map}  />
             <DropdownMenu>
               <DropdownMenuTrigger asChild className="mr-2">
                 <Button variant={"ghost"} className="font-bold">
@@ -46,7 +55,8 @@ export default function Menubar({
         </div>
         <FilterSheet />
       </div>
-      <div className="w-fit fixed right-3 top-6 sm:hidden">
+      <div className="w-fit fixed right-3 top-6 sm:hidden flex gap-2">
+        <ZoneFilter setZoneActive={setZoneActive} map={map}  />
         <FilterSheet />
       </div>
     </div>

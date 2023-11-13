@@ -50,11 +50,12 @@ export default function FilterSheet() {
         </Button>
       </DialogTrigger>
       <DialogContent
-        className="z-[999] overflow-y-auto"
+        className="z-[999]"
       >
         <DialogHeader className='border-b'>
           <DialogTitle className="text-center pb-2">Filters</DialogTitle>
         </DialogHeader>
+        <div className='max-h-[60vh] pl-3 pr-5 overflow-y-auto'>
         <div className="mt-8 pb-8 border-b">
           <DialogTitle>Price Range</DialogTitle>
           <DialogDescription>
@@ -250,6 +251,7 @@ export default function FilterSheet() {
             </div>
           </div>
         )}
+        </div>
         <DialogFooter>
           <Button
             variant={"link"}

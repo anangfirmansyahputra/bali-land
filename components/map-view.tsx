@@ -1,34 +1,46 @@
-"use client"
+"use client";
 
-import badung from '@/data/badung.json';
-import extendedMasking from '@/data/extended-masking.json';
-import landPlots2 from '@/data/land-plots.json';
-import masking from '@/data/masking.json';
-import supabase from '@/supabase';
-import mapboxgl, { LngLatLike, Map } from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import { useEffect, useState } from 'react';
-import InfoPanel from './info-panel';
-import Loading from './loading';
-import Menubar from './menu-bar';
+import badung from "@/data/badung.json";
+import extendedMasking from "@/data/extended-masking.json";
+import masking from "@/data/masking.json";
+import supabase from "@/supabase";
+import mapboxgl, { Map } from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { useEffect, useState } from "react";
+import wkx from "wkx";
+import InfoPanel from "./info-panel";
+import Loading from "./loading";
+import Menubar from "./menu-bar";
+import ZoneFilter from "./zone-filter";
 
 export default function MapView() {
+  const west_boundary = 115.1176;
+  const south_boundary = -8.6383;
+  const east_boundary = 115.1405;
+  const north_boundary = -8.6217;
+
   const [instanceMap, setInstanceMap] = useState<Map>();
-  const [showInfoPanel, setShowInfoPanel] = useState<boolean>(true)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [showInfoPanel, setShowInfoPanel] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [plots, setPlots] = useState<any[]>([]);
+  const [plotActive, setPlotActive] = useState<number | null>(null);
+  const [zoneActive, setZoneActive] = useState<string>("all");
+  const [showZoneFilter, setShowZoneFilter] = useState<boolean>(false)
+  
   // @ts-ignore
   let hoveredPolygonIdDistrict = null;
+  let hoveredPolygonIdPlot: string | number | null = null;
 
   const getDataBadung = async (map: Map) => {
-    const { data: badung } = await supabase.from('badung_districts').select();
+    const { data: badung } = await supabase.from("badung_districts").select();
 
-    map.addSource('badung-district', {
+    map.addSource("badung-district", {
       type: "geojson",
       data: {
         type: "FeatureCollection",
         features: badung,
-      }
-    } as mapboxgl.GeoJSONSourceRaw)
+      },
+    } as mapboxgl.GeoJSONSourceRaw);
 
     map.addLayer({
       id: "badung-district-fills",
@@ -41,12 +53,12 @@ export default function MapView() {
         "fill-color": "#4B0082",
         "fill-opacity": [
           "case",
-          ["boolean", ["feature-state", 'hover'], false],
+          ["boolean", ["feature-state", "hover"], false],
           0.7,
-          0.5
-        ]
-      }
-    })
+          0.5,
+        ],
+      },
+    });
 
     map.addLayer({
       id: "badung-district-borders",
@@ -57,11 +69,11 @@ export default function MapView() {
       minzoom: 10,
       paint: {
         "line-color": "#fff",
-        "line-width": 2
-      }
-    })
+        "line-width": 2,
+      },
+    });
 
-    map.on('mousemove', 'badung-district-fills', (e) => {
+    map.on("mousemove", "badung-district-fills", (e) => {
       if (e.features?.length || 0 > 0) {
         // @ts-ignore
         if (hoveredPolygonIdDistrict !== null) {
@@ -69,39 +81,39 @@ export default function MapView() {
             // @ts-ignore
             { source: "badung-district", id: hoveredPolygonIdDistrict },
             { hover: false }
-          )
+          );
         }
 
         // @ts-ignore
-        hoveredPolygonIdDistrict = e.features[0].id
+        hoveredPolygonIdDistrict = e.features[0].id;
         map.setFeatureState(
           { source: "badung-district", id: hoveredPolygonIdDistrict },
           { hover: true }
-        )
+        );
       }
-    })
+    });
 
-    map.on('mouseleave', 'badung-district-fills', () => {
+    map.on("mouseleave", "badung-district-fills", () => {
       // @ts-ignore
       if (hoveredPolygonIdDistrict !== null) {
         map.setFeatureState(
           // @ts-ignore
-          { source: 'badung-district', id: hoveredPolygonIdDistrict },
+          { source: "badung-district", id: hoveredPolygonIdDistrict },
           { hover: false }
-        )
+        );
       }
       hoveredPolygonIdDistrict = null;
-    })
-
-    map.on('mouseenter', 'badung-district-fills', function () {
-      map.getCanvas().style.cursor = 'pointer';
     });
 
-    map.on('mouseleave', 'badung-district-fills', function () {
-      map.getCanvas().style.cursor = 'auto';
+    map.on("mouseenter", "badung-district-fills", function () {
+      map.getCanvas().style.cursor = "pointer";
     });
 
-    map.on('click', 'badung-district-fills', function (e: any) {
+    map.on("mouseleave", "badung-district-fills", function () {
+      map.getCanvas().style.cursor = "auto";
+    });
+
+    map.on("click", "badung-district-fills", function (e: any) {
       const clickedFeature = e.features[0];
 
       if (clickedFeature) {
@@ -111,171 +123,253 @@ export default function MapView() {
         });
       }
     });
-  }
+  };
+
+  const getDataZoningArea = async (map: Map) => {
+    let data: any = [];
+    let start = 0;
+    let size = 1000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const {
+        data: plots,
+        error,
+        count,
+      } = await supabase
+        .from("zoning_areas")
+        .select("*", { count: "exact" })
+        .range(start, start + size - 1);
+
+      if (error) throw error;
+
+      data = [...data, ...plots];
+      start += size;
+      hasMore = (count ?? 0) > start;
+    }
+
+    map.addSource("zoning_areas", {
+      type: "geojson",
+      data: {
+        type: "FeatureCollection",
+        features: data.map((item: any) => {
+          const information = JSON.parse(item.information);
+
+          return {
+            type: "Feature",
+            geometry: wkx.Geometry.parse(
+              Buffer.from(item.zoning_geom, "hex")
+            ).toGeoJSON(),
+            properties: {
+              zoneCode: item.zone_code,
+              color:
+                information.zone.color.replaceAll(" ", ",").split(",")
+                  .length === 3
+                  ? `rgb(${information.zone.color.replaceAll(" ", ",")})`
+                  : `rgba(${information.zone.color.replaceAll(" ", ",")})`,
+            },
+          };
+        }),
+      },
+    });
+
+    map.addLayer({
+      id: "zoning_areas_fills",
+      type: "fill",
+      source: "zoning_areas",
+      layout: {},
+      minzoom: 14,
+      paint: {
+        "fill-color": [
+          "case",
+          ["==", zoneActive, "all"],
+          ["get", "color"],
+          [
+            "case",
+            ["==", ["get", "zoneCode"], zoneActive],
+            ["get", "color"],
+            "transparent",
+          ],
+        ],
+        "fill-opacity": 0.3,
+      },
+    });
+    
+    map.addLayer({
+      id: "zoning_areas_outline",
+      type: "line",
+      source: "zoning_areas",
+      layout: {},
+      minzoom: 14,
+      paint: {
+        "line-color": [
+          "case",
+          ["==", zoneActive, "all"],
+          ["get", "color"],
+          [
+            "case",
+            ["==", ["get", "zoneCode"], zoneActive],
+            ["get", "color"],
+            "transparent",
+          ],
+        ],
+        "line-opacity": 1,
+      },
+    });
+  };
 
   const getDataLandplots = async (map: Map) => {
+    let data: any = [];
+    let start = 0;
+    let size = 1000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const {
+        data: plots,
+        error,
+        count,
+      } = await supabase
+        .from("plots")
+        .select("*", { count: "exact" })
+        .range(start, start + size - 1);
+
+      if (error) throw error;
+
+      data = [...data, ...plots];
+      start += size;
+      hasMore = (count ?? 0) > start;
+    }
+
+    setPlots(data);
+
     // Land Plots
-    map.addSource('landPlots', {
-      'type': 'geojson',
+    map.addSource("plots", {
+      type: "geojson",
       data: {
         type: "FeatureCollection",
         // @ts-ignore
-        features: landPlots2.map((landPlot) => {
-          const zoneCode = landPlot.territorials.geom[0].zone.code;
-          const territorials = JSON.parse(landPlot?.territorials?.geom?.[0]?.geojson);
-
-          let certificate;
-
-          if (landPlot?.certificate) {
-            certificate = JSON.parse(landPlot.certificate);
-          } else {
-            certificate = null; // Atau berikan nilai default lain jika diperlukan
-          }
-
-          let polygon;
-
-          if (zoneCode === "BJ" || zoneCode === "BA" || zoneCode === "SS") {
-            polygon = territorials
-          } else {
-            polygon = certificate?.features?.[0]?.geometry || null
-          }
-
-          if (polygon !== undefined && polygon !== null) {
-            return {
-              type: "Feature",
-              properties: {
-                zoneCode: zoneCode,
-                data: {
-                  ...landPlot.territorials.geom[0],
-                  geojson: null,
-                  center: landPlot.center
-                }
-              },
-              geometry: polygon
-            };
-          }
-          return null;
-        }).filter((feature: any) => feature !== null)
-      }
-    });
+        features: data?.map((item) => {
+          return {
+            type: "Feature",
+            geometry: wkx.Geometry.parse(
+              Buffer.from(item.geometry, "hex")
+            ).toGeoJSON(),
+            properties: {
+              center: wkx.Geometry.parse(
+                Buffer.from(item.center, "hex")
+              ).toGeoJSON(),
+              id: item.id
+            },
+          };
+        }),
+      },
+    } as mapboxgl.GeoJSONSourceRaw);
 
     map.addLayer({
-      id: 'landPlots',
-      type: 'fill',
-      source: 'landPlots',
-      layout: {},
+      id: "plots-fills",
+      type: "fill",
+      source: "plots",
       minzoom: 14,
       paint: {
-        'fill-color': [
-          'case',
-          ['==', ['get', 'zoneCode'], 'BA'], '#192bc2',
-          ['==', ['get', 'zoneCode'], 'BJ'], '#de0a26',
-          ['==', ['get', 'zoneCode'], 'SS'], '#192bc2',
-          '#4B0082'
+        "fill-color": "#4B0082",
+        "fill-opacity": [
+          "case",
+          ["boolean", ["feature-state", "hover"], false],
+          0.7,
+          0.5,
         ],
-        'fill-opacity': 0.5,
       },
     });
 
     map.addLayer({
-      id: 'outline',
-      type: 'line',
+      id: "plots-outline",
+      type: "line",
       minzoom: 14,
-      source: 'landPlots',
+      source: "plots",
       layout: {},
       paint: {
-        'line-color': [
-          'case',
-          ['==', ['get', 'zoneCode'], 'BA'], '#192bc2',
-          ['==', ['get', 'zoneCode'], 'BJ'], '#de0a26',
-          ['==', ['get', 'zoneCode'], 'SS'], '#192bc2',
-          "#fff"
-        ],
-        'line-width': 2,
+        "line-color": "#fff",
+        "line-width": 2,
       },
     });
 
-    map.on('mouseenter', 'landPlots', function () {
-      map.getCanvas().style.cursor = 'pointer';
+    map.on("mouseenter", "plots-fills", function () {
+      map.getCanvas().style.cursor = "pointer";
     });
 
-    map.on('mouseleave', 'landPlots', function () {
-      map.getCanvas().style.cursor = 'auto';
+    map.on("mouseleave", "plots-fills", function () {
+      map.getCanvas().style.cursor = "auto";
     });
 
-    map.on('click', 'landPlots', (e: any) => {
-      const information = JSON.parse(e.features[0].properties.data);
+    map.on("click", "plots-fills", (e: any) => {
+      const information = JSON.parse(e.features[0].properties.center);
+      setPlotActive(e.features[0].properties.id);
 
       map.flyTo({
-        center: information.center.lat > 90 ? {
-          lat: information.center.lng,
-          lng: information.center.lat,
-        } : information.center,
+        center: {
+          lat: information.coordinates[1],
+          lng: information.coordinates[0],
+        },
         zoom: 18,
-        duration: 2000
+        duration: 2000,
       });
-    })
+    });
+    
+    data.forEach((plot: any) => {
+      const center = wkx.Geometry.parse(Buffer.from(plot.center, 'hex')).toGeoJSON()
+      const randomPrice = Math.floor(Math.random() * (1000 - 150 + 1)) + 150;
 
-    if (Array.isArray(landPlots2)) {
-      landPlots2.forEach((landPlot) => {
-        // @ts-ignore
-        const center = parseFloat(landPlot.center.lat) < 0 ? [
-          parseFloat(landPlot.center.lng),
-          landPlot.center.lat,
-        ] : [landPlot.center.lat, parseFloat(landPlot.center.lng)]
+      const customMarker = document.createElement("div");
+      customMarker.className = "custom-marker";
+      customMarker.innerHTML = `$${randomPrice}K`;
+      customMarker.dataset.plotId = plot.id
 
-        const randomPrice = Math.floor(Math.random() * (1000 - 150 + 1)) + 150
-
-        const customMarker = document.createElement('div');
-        customMarker.className = "custom-marker";
-        customMarker.innerHTML = `$${randomPrice}K`;
-
-        const marker = new mapboxgl.Marker({
-          element: customMarker,
-          anchor: "bottom"
-        })
-          // @ts-ignore
-          .setLngLat(center)
-          .addTo(map)
-
-        marker.getElement().addEventListener('click', function () {
-          map.flyTo({
-            // @ts-ignore
-            center: center,
-            zoom: 18,
-          });
-        })
-
+      const marker = new mapboxgl.Marker({
+        element: customMarker,
+        anchor: "bottom",
       })
-    }
-  }
+      // @ts-ignore
+      .setLngLat(center.coordinates)
+      .addTo(map)
 
+      marker.getElement().addEventListener("click", function () {
+        setPlotActive(plot.id)
+        
+        map.flyTo({
+          // @ts-ignore
+          center: center.coordinates,
+          zoom: 18,
+        });
+      });
+    });
+  };
+  
   useEffect(() => {
     mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
 
     const map: Map = new mapboxgl.Map({
       container: "map",
-      style: 'mapbox://styles/mapbox/satellite-streets-v12',
+      style: "mapbox://styles/mapbox/satellite-streets-v12",
       center: [115.087004, -8.337301],
       zoom: 9,
       maxBounds: [
         [114.2, -9.1],
-        [116.2, -8.2]
+        [116.2, -8.2],
       ],
     });
 
-    setInstanceMap(map)
+    setInstanceMap(map);
 
     // @ts-ignore
     let hoveredPolygonId = null;
 
-    map.on('load', () => {
-      getDataBadung(map)
-      getDataLandplots(map)
+    map.on("load", async () => {
+      await getDataBadung(map);
+      await getDataZoningArea(map);
+      await getDataLandplots(map);
 
-      setIsLoading(false)
-
-      map.getCanvas().style.cursor = 'auto';
+      map.getCanvas().style.cursor = "auto";
 
       // Masking
       map.addLayer({
@@ -284,22 +378,21 @@ export default function MapView() {
         source: {
           type: "geojson",
           // @ts-ignore
-          data: masking
-
+          data: masking,
         },
         layout: {},
         paint: {
           "fill-color": "#fff",
-          "fill-opacity": 1
-        }
-      })
+          "fill-opacity": 1,
+        },
+      });
 
       // Regency
-      map.addSource('regency', {
+      map.addSource("regency", {
         type: "geojson",
         // @ts-ignore
-        data: badung
-      })
+        data: badung,
+      });
 
       map.addLayer({
         id: "regency-fills",
@@ -312,12 +405,12 @@ export default function MapView() {
           "fill-color": "#4B0082",
           "fill-opacity": [
             "case",
-            ["boolean", ["feature-state", 'hover'], false],
+            ["boolean", ["feature-state", "hover"], false],
             0.7,
-            0.5
-          ]
-        }
-      })
+            0.5,
+          ],
+        },
+      });
 
       map.addLayer({
         id: "regency-borders",
@@ -328,42 +421,8 @@ export default function MapView() {
         layout: {},
         paint: {
           "line-color": "#4B0082",
-          "line-width": 2
-        }
-      })
-
-      // Traffic
-      map.addLayer({
-        id: "traffic-layer",
-        type: "line",
-        source: {
-          type: "geojson",
-          data: {
-            type: "Feature",
-            properties: {},
-            geometry: {
-              type: "LineString",
-              coordinates: [
-                [
-                  -9.015302333420587,
-                  114.60937499999999
-                ],
-                [
-                  -8.971897294083012,
-                  115.75195312500001
-                ]
-              ]
-            }
-          }
+          "line-width": 2,
         },
-        layout: {
-          'line-join': 'round',
-          'line-cap': 'round',
-        },
-        paint: {
-          'line-color': "#ff0000",
-          "line-width": 5
-        }
       });
 
       // Extended Masking
@@ -373,15 +432,15 @@ export default function MapView() {
         source: {
           type: "geojson",
           // @ts-ignore
-          data: extendedMasking
+          data: extendedMasking,
         },
         layout: {},
         paint: {
           "fill-color": "#fff",
-        }
-      })
+        },
+      });
 
-      map.on('mousemove', 'regency-fills', (e) => {
+      map.on("mousemove", "regency-fills", (e) => {
         if (e.features?.length || 0 > 0) {
           // @ts-ignore
           if (hoveredPolygonId !== null) {
@@ -389,38 +448,38 @@ export default function MapView() {
               // @ts-ignore
               { source: "regency", id: hoveredPolygonId },
               { hover: false }
-            )
+            );
           }
           // @ts-ignore
-          hoveredPolygonId = e.features[0].id
+          hoveredPolygonId = e.features[0].id;
           map.setFeatureState(
             { source: "regency", id: hoveredPolygonId },
             { hover: true }
-          )
+          );
         }
-      })
+      });
 
-      map.on('mouseleave', 'regency-fills', () => {
+      map.on("mouseleave", "regency-fills", () => {
         // @ts-ignore
         if (hoveredPolygonId !== null) {
           map.setFeatureState(
             // @ts-ignore
-            { source: 'regency', id: hoveredPolygonId },
+            { source: "regency", id: hoveredPolygonId },
             { hover: false }
-          )
+          );
         }
         hoveredPolygonId = null;
-      })
-
-      map.on('mouseenter', 'regency-fills', function () {
-        map.getCanvas().style.cursor = 'pointer';
       });
 
-      map.on('mouseleave', 'regency-fills', function () {
-        map.getCanvas().style.cursor = 'auto';
+      map.on("mouseenter", "regency-fills", function () {
+        map.getCanvas().style.cursor = "pointer";
       });
 
-      map.on('click', 'regency-fills', function (e: any) {
+      map.on("mouseleave", "regency-fills", function () {
+        map.getCanvas().style.cursor = "auto";
+      });
+
+      map.on("click", "regency-fills", function (e: any) {
         const clickedFeature = e.features[0];
 
         if (clickedFeature) {
@@ -430,25 +489,49 @@ export default function MapView() {
           });
         }
       });
+
+      setIsLoading(false);
     });
 
     return () => map.remove();
   }, []);
 
+  useEffect(() => {
+    const markers = document.getElementsByClassName('custom-marker');
+    for (let i = 0; i < markers.length; i++) {
+      const marker = markers[i];
+      
+      const isActive = plotActive && Number((marker as HTMLElement).dataset.plotId) === plotActive;
+  
+      if (isActive) {
+        marker.classList.add('active-marker'); // Menambah class 'active-marker' pada marker yang aktif
+      } else {
+        marker.classList.remove('active-marker'); // Menghapus class 'active-marker' dari marker yang tidak aktif
+      }
+    }
+  }, [plotActive]);
+
   return (
     <>
       {isLoading && <Loading />}
-      <div className='relative w-full h-screen'>
-        <Menubar
-          setShowInfoPanel={setShowInfoPanel}
-        />
-        <InfoPanel
-          // @ts-ignore
-          map={instanceMap}
-          isActive={showInfoPanel}
-          setShowInfoPanel={setShowInfoPanel}
-        />
-        <div id='map' style={{ width: '100vw', height: '100vh' }}></div>
+      <div className="relative w-full h-screen">
+        {instanceMap && (
+          <Menubar 
+            setShowInfoPanel={setShowInfoPanel} 
+            setShowZoneFilter={setShowZoneFilter}
+            setZoneActive={setZoneActive}
+            map={instanceMap}
+          />
+        )}
+        {instanceMap && (
+          <InfoPanel
+            plots={plots}
+            map={instanceMap}
+            isActive={showInfoPanel}
+            setShowInfoPanel={setShowInfoPanel}
+          />
+        )}
+        <div id="map" style={{ width: "100vw", height: "100vh" }}></div>
       </div>
     </>
   );
