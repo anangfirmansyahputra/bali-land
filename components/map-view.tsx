@@ -11,14 +11,11 @@ import wkx from "wkx";
 import InfoPanel from "./info-panel";
 import Loading from "./loading";
 import Menubar from "./menu-bar";
-import ZoneFilter from "./zone-filter";
+import PlotPopup from "./plot-popup";
+import {createRoot} from "react-dom/client";
+import PlotPopUpMobile from "./plot-popup-mobile";
 
 export default function MapView() {
-  const west_boundary = 115.1176;
-  const south_boundary = -8.6383;
-  const east_boundary = 115.1405;
-  const north_boundary = -8.6217;
-
   const [instanceMap, setInstanceMap] = useState<Map>();
   const [showInfoPanel, setShowInfoPanel] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -26,6 +23,9 @@ export default function MapView() {
   const [plotActive, setPlotActive] = useState<number | null>(null);
   const [zoneActive, setZoneActive] = useState<string>("all");
   const [showZoneFilter, setShowZoneFilter] = useState<boolean>(false)
+  const [isMobile, setIsMobile] = useState<boolean>(false)
+  const [popupActive, setPopupActive] = useState<any | null>(null)
+  let activePopup: mapboxgl.Popup | null = null;
   
   // @ts-ignore
   let hoveredPolygonIdDistrict = null;
@@ -113,16 +113,16 @@ export default function MapView() {
       map.getCanvas().style.cursor = "auto";
     });
 
-    map.on("click", "badung-district-fills", function (e: any) {
-      const clickedFeature = e.features[0];
+    // map.on("click", "badung-district-fills", function (e: any) {
+    //   const clickedFeature = e.features[0];
 
-      if (clickedFeature) {
-        map.flyTo({
-          center: e.lngLat,
-          zoom: 15,
-        });
-      }
-    });
+    //   if (clickedFeature) {
+    //     map.flyTo({
+    //       center: e.lngLat,
+    //       zoom: 15,
+    //     });
+    //   }
+    // });
   };
 
   const getDataZoningArea = async (map: Map) => {
@@ -248,8 +248,7 @@ export default function MapView() {
       type: "geojson",
       data: {
         type: "FeatureCollection",
-        // @ts-ignore
-        features: data?.map((item) => {
+        features: data?.map((item: any) => {
           return {
             type: "Feature",
             geometry: wkx.Geometry.parse(
@@ -301,20 +300,6 @@ export default function MapView() {
     map.on("mouseleave", "plots-fills", function () {
       map.getCanvas().style.cursor = "auto";
     });
-
-    map.on("click", "plots-fills", (e: any) => {
-      const information = JSON.parse(e.features[0].properties.center);
-      setPlotActive(e.features[0].properties.id);
-
-      map.flyTo({
-        center: {
-          lat: information.coordinates[1],
-          lng: information.coordinates[0],
-        },
-        zoom: 18,
-        duration: 2000,
-      });
-    });
     
     data.forEach((plot: any) => {
       const center = wkx.Geometry.parse(Buffer.from(plot.center, 'hex')).toGeoJSON()
@@ -329,24 +314,75 @@ export default function MapView() {
         element: customMarker,
         anchor: "bottom",
       })
-      // @ts-ignore
-      .setLngLat(center.coordinates)
+      .setLngLat((center as any).coordinates)
       .addTo(map)
 
       marker.getElement().addEventListener("click", function () {
+        if (activePopup) {
+          activePopup.remove()
+        }
         setPlotActive(plot.id)
+
+        if (isMobile) {
+          const data = {
+            ...plot,
+            price: randomPrice,
+            onClose: () => {
+              setPopupActive(null)
+              setPlotActive(null)
+            }
+          }
+          setPopupActive(data)
+        }
         
-        map.flyTo({
-          // @ts-ignore
-          center: center.coordinates,
-          zoom: 18,
-        });
+        if (!isMobile) {
+          const data = {
+            ...plot,
+            price: randomPrice,
+          }
+          const container = document.createElement('div');
+          const popup = new mapboxgl.Popup({ 
+            closeOnClick: false,
+            closeButton: false,
+            offset: 40,
+            focusAfterOpen: true
+          })
+          .setLngLat((center as any).coordinates)
+          createRoot(container).render(<PlotPopup data={data} onClose={() => {
+            setPlotActive(null)
+            popup.remove()
+          }} />);
+          
+          popup
+            .setDOMContent(container)
+            .addTo(map);
+          
+            activePopup = popup;
+        }
       });
     });
+  };
+
+  const handleMediaQueryChange = (mediaQuery: MediaQueryListEvent) => {
+    if (mediaQuery.matches) {
+      // Browser sedang pada perangkat mobile
+      console.log('mobile');
+      setIsLoading(true)
+      setIsMobile(true)
+    } else {
+      console.log('desktop');
+      setIsLoading(true)
+      setPopupActive(null)
+      setIsMobile(false)
+    }
   };
   
   useEffect(() => {
     mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
+    const mediaQuery = window.matchMedia(`(max-width: 744px)`)
+    // @ts-ignore
+    handleMediaQueryChange(mediaQuery)
+    mediaQuery.addListener(handleMediaQueryChange);
 
     const map: Map = new mapboxgl.Map({
       container: "map",
@@ -479,22 +515,25 @@ export default function MapView() {
         map.getCanvas().style.cursor = "auto";
       });
 
-      map.on("click", "regency-fills", function (e: any) {
-        const clickedFeature = e.features[0];
+      // map.on("click", "regency-fills", function (e: any) {
+      //   const clickedFeature = e.features[0];
 
-        if (clickedFeature) {
-          map.flyTo({
-            center: e.lngLat,
-            zoom: 10,
-          });
-        }
-      });
+      //   if (clickedFeature) {
+      //     map.flyTo({
+      //       center: e.lngLat,
+      //       zoom: 10,
+      //     });
+      //   }
+      // });
 
       setIsLoading(false);
     });
 
-    return () => map.remove();
-  }, []);
+    return () => {
+      mediaQuery.removeListener(handleMediaQueryChange);
+      map.remove();
+    }
+  }, [isMobile]);
 
   useEffect(() => {
     const markers = document.getElementsByClassName('custom-marker');
@@ -532,6 +571,9 @@ export default function MapView() {
           />
         )}
         <div id="map" style={{ width: "100vw", height: "100vh" }}></div>
+        {isMobile && popupActive && (
+          <PlotPopUpMobile data={popupActive} />
+        )}
       </div>
     </>
   );

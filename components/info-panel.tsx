@@ -22,9 +22,8 @@ export default function InfoPanel({
     return (
       <Card
         role="button"
-        className={`fixed z-[50] h-[calc(100vh-10px)] max-w-max sm:h-[calc(100vh-88px)] lg:w-[60%] xl:w-[50%] 2xl:w-[30%] ${
-          !isActive ? "top-[calc(100%-56px)]" : "top-0 mt-[88px]"
-        } transition-all duration-500 left-3 right-3 flex flex-col rounded-none rounded-t-lg`}
+        className={`fixed z-[50] h-[calc(100vh-10px)] max-w-max sm:h-[calc(100vh-88px)] lg:w-[60%] xl:w-[50%] 2xl:w-[30%] ${!isActive ? "top-[calc(100%-56px)]" : "top-0 mt-[88px]"
+          } transition-all duration-500 left-3 right-3 flex flex-col rounded-none rounded-t-lg`}
       >
         {!isActive && (
           <CardHeader className="p-2" onClick={() => setShowInfoPanel(true)}>

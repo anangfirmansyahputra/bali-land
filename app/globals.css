@@ -117,7 +117,7 @@
 .custom-marker:hover {
   background-color: #3854F5 !important;
   color: #fff;
-  z-index: 40;
+  z-index: 40 !important;
   padding: 4px 14px !important;
   margin-top: -2px;
 }
@@ -125,7 +125,7 @@
 .active-marker {
   background-color: #3854F5 !important;
   color: #fff;
-  z-index: 40;
+  z-index: 40 !important;
   padding: 4px 14px !important;
   margin-top: -2px;
 }
@@ -219,4 +219,38 @@
     opacity: 0;
     visibility: hidden;
   }
+}
+
+.mapboxgl-popup {
+  max-width: fit-content !important;
+  z-index: 50 !important;
+}
+
+.mapboxgl-popup-content {
+  width: fit-content !important;
+  padding: 0px !important;
+  border: none !important;
+  background-color: transparent !important;
+}
+
+.mapboxgl-popup-tip {
+  display: none !important;
+}
+
+.slick-dots {
+  bottom: 10px !important;
+}
+
+.slick-dots li {
+  margin: 0 !important;
+  width: 15px !important;
+}
+
+.slick-dots li button::before {
+  color: white !important;
+  font-size: 8px !important;
+}
+
+.plot:hover div .arrow-btn {
+  opacity: 1;
 }
