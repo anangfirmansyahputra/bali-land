@@ -44,7 +44,7 @@ export default function FilterSheet() {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
+      <DialogTrigger asChild className='z-[999]'>
         <Button size={"icon"} variant={"secondary"} className="rounded-full">
           <SlidersHorizontal />
         </Button>
