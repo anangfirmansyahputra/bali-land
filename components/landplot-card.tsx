@@ -3,19 +3,19 @@ import { Badge } from "./ui/badge";
 import { Map } from "mapbox-gl";
 
 interface LandplotCardProps {
-  map: Map;
+  // map: Map;
   center: [number, number];
 }
 
 export default function LandplotCard({
   center,
-  map
+  // map
 }: LandplotCardProps) {
   const handleFly = (center: [number, number]) => {
-    map.flyTo({
-      center,
-      zoom: 18,
-    });
+    // map.flyTo({
+    //   center,
+    //   zoom: 18,
+    // });
   }
 
   const randomPrice = Math.floor(Math.random() * (1000 - 150 + 1)) + 150

@@ -12,8 +12,11 @@ import InfoPanel from "./info-panel";
 import Loading from "./loading";
 import Menubar from "./menu-bar";
 import PlotPopup from "./plot-popup";
-import {createRoot} from "react-dom/client";
+import { createRoot } from "react-dom/client";
 import PlotPopUpMobile from "./plot-popup-mobile";
+import { Card, CardHeader } from "./ui/card";
+import { Button } from "./ui/button";
+import { ChevronUp } from "lucide-react";
 
 export default function MapView() {
   const [instanceMap, setInstanceMap] = useState<Map>();
@@ -22,11 +25,11 @@ export default function MapView() {
   const [plots, setPlots] = useState<any[]>([]);
   const [plotActive, setPlotActive] = useState<number | null>(null);
   const [zoneActive, setZoneActive] = useState<string>("all");
-  const [showZoneFilter, setShowZoneFilter] = useState<boolean>(false)
-  const [isMobile, setIsMobile] = useState<boolean>(false)
-  const [popupActive, setPopupActive] = useState<any | null>(null)
+  const [showZoneFilter, setShowZoneFilter] = useState<boolean>(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [popupActive, setPopupActive] = useState<any | null>(null);
   let activePopup: mapboxgl.Popup | null = null;
-  
+
   // @ts-ignore
   let hoveredPolygonIdDistrict = null;
   let hoveredPolygonIdPlot: string | number | null = null;
@@ -194,7 +197,7 @@ export default function MapView() {
         "fill-opacity": 0.3,
       },
     });
-    
+
     map.addLayer({
       id: "zoning_areas_outline",
       type: "line",
@@ -258,7 +261,7 @@ export default function MapView() {
               center: wkx.Geometry.parse(
                 Buffer.from(item.center, "hex")
               ).toGeoJSON(),
-              id: item.id
+              id: item.id,
             },
           };
         }),
@@ -300,9 +303,11 @@ export default function MapView() {
     map.on("mouseleave", "plots-fills", function () {
       map.getCanvas().style.cursor = "auto";
     });
-    
+
     data.forEach((plot: any) => {
-      const center = wkx.Geometry.parse(Buffer.from(plot.center, 'hex')).toGeoJSON()
+      const center = wkx.Geometry.parse(
+        Buffer.from(plot.center, "hex")
+      ).toGeoJSON();
       const randomPrice = Math.floor(Math.random() * (1000 - 150 + 1)) + 150;
       const randomNum = Math.random() < 0.1 ? 1 : 0;
       let randomMarker;
@@ -311,13 +316,13 @@ export default function MapView() {
         const customMarker = document.createElement("div");
         customMarker.className = "custom-marker";
         customMarker.innerHTML = `$${randomPrice}K`;
-        customMarker.dataset.plotId = plot.id
+        customMarker.dataset.plotId = plot.id;
         randomMarker = customMarker;
       } else {
         const customMarker = document.createElement("div");
         customMarker.className = "custom-marker-hidden";
         customMarker.innerHTML = `$${randomPrice}K`;
-        customMarker.dataset.plotId = plot.id
+        customMarker.dataset.plotId = plot.id;
         randomMarker = customMarker;
       }
 
@@ -325,51 +330,54 @@ export default function MapView() {
         element: randomMarker,
         anchor: "bottom",
       })
-      .setLngLat((center as any).coordinates)
-      .addTo(map)
+        .setLngLat((center as any).coordinates)
+        .addTo(map);
 
       marker.getElement().addEventListener("click", function () {
         if (activePopup) {
-          activePopup.remove()
+          activePopup.remove();
         }
-        setPlotActive(plot.id)
+        setPlotActive(plot.id);
 
         if (isMobile) {
           const data = {
             ...plot,
             price: randomPrice,
             onClose: () => {
-              setPopupActive(null)
-              setPlotActive(null)
-            }
-          }
-          setPopupActive(data)
+              setPopupActive(null);
+              setPlotActive(null);
+            },
+          };
+          setPopupActive(data);
         }
-        
+
         if (!isMobile) {
           const data = {
             ...plot,
             price: randomPrice,
-          }
-          const container = document.createElement('div');
-          const popup = new mapboxgl.Popup({ 
+          };
+          const container = document.createElement("div");
+          const popup = new mapboxgl.Popup({
             closeOnClick: false,
             closeButton: false,
             offset: 40,
-            focusAfterOpen: true
-          })
-          .setLngLat((center as any).coordinates)
-          createRoot(container).render(<PlotPopup data={data} onClose={() => {
-            setPlotActive(null)
-            popup.remove()
-          }} />);
-          
-          popup
-            .setDOMContent(container)
-          
-          marker.setPopup(popup)
-          
-            activePopup = popup;
+            focusAfterOpen: true,
+          }).setLngLat((center as any).coordinates);
+          createRoot(container).render(
+            <PlotPopup
+              data={data}
+              onClose={() => {
+                setPlotActive(null);
+                popup.remove();
+              }}
+            />
+          );
+
+          popup.setDOMContent(container);
+
+          marker.setPopup(popup);
+
+          activePopup = popup;
         }
       });
     });
@@ -377,20 +385,20 @@ export default function MapView() {
 
   const handleMediaQueryChange = (mediaQuery: MediaQueryListEvent) => {
     if (mediaQuery.matches) {
-      setIsLoading(true)
-      setIsMobile(true)
+      setIsLoading(true);
+      setIsMobile(true);
     } else {
-      setIsLoading(true)
-      setPopupActive(null)
-      setIsMobile(false)
+      setIsLoading(true);
+      setPopupActive(null);
+      setIsMobile(false);
     }
   };
-  
+
   useEffect(() => {
     mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
-    const mediaQuery = window.matchMedia(`(max-width: 744px)`)
+    const mediaQuery = window.matchMedia(`(max-width: 744px)`);
     // @ts-ignore
-    handleMediaQueryChange(mediaQuery)
+    handleMediaQueryChange(mediaQuery);
     mediaQuery.addListener(handleMediaQueryChange);
 
     const map: Map = new mapboxgl.Map({
@@ -541,33 +549,39 @@ export default function MapView() {
     return () => {
       mediaQuery.removeListener(handleMediaQueryChange);
       map.remove();
-    }
+    };
   }, [isMobile]);
 
   useEffect(() => {
-    const markers = document.getElementsByClassName('custom-marker');
-    const markersHidden = document.getElementsByClassName('custom-marker-hidden');
+    const markers = document.getElementsByClassName("custom-marker");
+    const markersHidden = document.getElementsByClassName(
+      "custom-marker-hidden"
+    );
     for (let i = 0; i < markers.length; i++) {
       const marker = markers[i];
-      
-      const isActive = plotActive && Number((marker as HTMLElement).dataset.plotId) === plotActive;
-  
+
+      const isActive =
+        plotActive &&
+        Number((marker as HTMLElement).dataset.plotId) === plotActive;
+
       if (isActive) {
-        marker.classList.add('active-marker'); // Menambah class 'active-marker' pada marker yang aktif
+        marker.classList.add("active-marker"); // Menambah class 'active-marker' pada marker yang aktif
       } else {
-        marker.classList.remove('active-marker'); // Menghapus class 'active-marker' dari marker yang tidak aktif
+        marker.classList.remove("active-marker"); // Menghapus class 'active-marker' dari marker yang tidak aktif
       }
     }
 
     for (let i = 0; i < markersHidden.length; i++) {
       const marker = markersHidden[i];
-      
-      const isActive = plotActive && Number((marker as HTMLElement).dataset.plotId) === plotActive;
-  
+
+      const isActive =
+        plotActive &&
+        Number((marker as HTMLElement).dataset.plotId) === plotActive;
+
       if (isActive) {
-        marker.classList.add('active-marker'); // Menambah class 'active-marker' pada marker yang aktif
+        marker.classList.add("active-marker"); // Menambah class 'active-marker' pada marker yang aktif
       } else {
-        marker.classList.remove('active-marker'); // Menghapus class 'active-marker' dari marker yang tidak aktif
+        marker.classList.remove("active-marker"); // Menghapus class 'active-marker' dari marker yang tidak aktif
       }
     }
   }, [plotActive]);
@@ -577,25 +591,26 @@ export default function MapView() {
       {isLoading && <Loading />}
       <div className="relative w-full h-screen">
         {instanceMap && (
-          <Menubar 
-            setShowInfoPanel={setShowInfoPanel} 
-            setShowZoneFilter={setShowZoneFilter}
-            setZoneActive={setZoneActive}
-            map={instanceMap}
-          />
+          <Menubar setZoneActive={setZoneActive} map={instanceMap} />
         )}
-        {/* {instanceMap && (
+        {showInfoPanel ? (
           <InfoPanel
             plots={plots}
-            map={instanceMap}
+            // map={instanceMap}
             isActive={showInfoPanel}
             setShowInfoPanel={setShowInfoPanel}
           />
-        )} */}
-        <div id="map" style={{ width: "100vw", height: "100vh" }}></div>
-        {isMobile && popupActive && (
-          <PlotPopUpMobile data={popupActive} />
+        ) : (
+          <Card className="absolute right-3 left-3 bottom-0 z-[52] lg:w-[60%] xl:w-[50%] 2xl:w-[30%]">
+            <CardHeader className="p-2" onClick={() => setShowInfoPanel(true)}>
+              <Button variant={"ghost"}>
+                <ChevronUp />
+              </Button>
+            </CardHeader>
+          </Card>
         )}
+        <div id="map" style={{ width: "100vw", height: "100vh" }}></div>
+        {isMobile && popupActive && <PlotPopUpMobile data={popupActive} />}
       </div>
     </>
   );
