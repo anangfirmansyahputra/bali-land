@@ -1,3 +1,5 @@
+"use client"
+
 import { ChevronLeft, ChevronRight, Heart, Star, X } from "lucide-react";
 import Image from "next/image";
 import Slider from "react-slick";
@@ -11,6 +13,7 @@ import {
   CardTitle
 } from "./ui/card";
 import {motion} from 'framer-motion';
+import { useEffect, useRef } from "react";
 
 interface PlotPopupProps {
   data: any;
@@ -59,13 +62,30 @@ var settings = {
   prevArrow:  <CustomArrow side="prev" />,
 };
 
-export default function PlotPopup({ data,onClose }: PlotPopupProps) {
+export default function PlotPopup({ data, onClose }: PlotPopupProps) {
+  const popupRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [onClose]);
+  
   return (
     <motion.div
+    ref={popupRef}
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     exit={{ opacity: 0 }}
-    transition={{ duration: 0.2 }}
+    transition={{ duration: 0.5 }}
     >
     <Card className="p-0 border-none max-w-[327px] relative z-[999] plot ">
       <Button

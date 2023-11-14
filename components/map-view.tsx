@@ -304,14 +304,25 @@ export default function MapView() {
     data.forEach((plot: any) => {
       const center = wkx.Geometry.parse(Buffer.from(plot.center, 'hex')).toGeoJSON()
       const randomPrice = Math.floor(Math.random() * (1000 - 150 + 1)) + 150;
+      const randomNum = Math.random() < 0.1 ? 1 : 0;
+      let randomMarker;
 
-      const customMarker = document.createElement("div");
-      customMarker.className = "custom-marker";
-      customMarker.innerHTML = `$${randomPrice}K`;
-      customMarker.dataset.plotId = plot.id
+      if (randomNum === 1) {
+        const customMarker = document.createElement("div");
+        customMarker.className = "custom-marker";
+        customMarker.innerHTML = `$${randomPrice}K`;
+        customMarker.dataset.plotId = plot.id
+        randomMarker = customMarker;
+      } else {
+        const customMarker = document.createElement("div");
+        customMarker.className = "custom-marker-hidden";
+        customMarker.innerHTML = `$${randomPrice}K`;
+        customMarker.dataset.plotId = plot.id
+        randomMarker = customMarker;
+      }
 
       const marker = new mapboxgl.Marker({
-        element: customMarker,
+        element: randomMarker,
         anchor: "bottom",
       })
       .setLngLat((center as any).coordinates)
@@ -355,7 +366,8 @@ export default function MapView() {
           
           popup
             .setDOMContent(container)
-            .addTo(map);
+          
+          marker.setPopup(popup)
           
             activePopup = popup;
         }
@@ -365,12 +377,9 @@ export default function MapView() {
 
   const handleMediaQueryChange = (mediaQuery: MediaQueryListEvent) => {
     if (mediaQuery.matches) {
-      // Browser sedang pada perangkat mobile
-      console.log('mobile');
       setIsLoading(true)
       setIsMobile(true)
     } else {
-      console.log('desktop');
       setIsLoading(true)
       setPopupActive(null)
       setIsMobile(false)
@@ -537,8 +546,21 @@ export default function MapView() {
 
   useEffect(() => {
     const markers = document.getElementsByClassName('custom-marker');
+    const markersHidden = document.getElementsByClassName('custom-marker-hidden');
     for (let i = 0; i < markers.length; i++) {
       const marker = markers[i];
+      
+      const isActive = plotActive && Number((marker as HTMLElement).dataset.plotId) === plotActive;
+  
+      if (isActive) {
+        marker.classList.add('active-marker'); // Menambah class 'active-marker' pada marker yang aktif
+      } else {
+        marker.classList.remove('active-marker'); // Menghapus class 'active-marker' dari marker yang tidak aktif
+      }
+    }
+
+    for (let i = 0; i < markersHidden.length; i++) {
+      const marker = markersHidden[i];
       
       const isActive = plotActive && Number((marker as HTMLElement).dataset.plotId) === plotActive;
   
@@ -562,14 +584,14 @@ export default function MapView() {
             map={instanceMap}
           />
         )}
-        {instanceMap && (
+        {/* {instanceMap && (
           <InfoPanel
             plots={plots}
             map={instanceMap}
             isActive={showInfoPanel}
             setShowInfoPanel={setShowInfoPanel}
           />
-        )}
+        )} */}
         <div id="map" style={{ width: "100vw", height: "100vh" }}></div>
         {isMobile && popupActive && (
           <PlotPopUpMobile data={popupActive} />

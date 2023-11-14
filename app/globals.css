@@ -107,27 +107,65 @@
   border-radius: 28px;
   cursor: pointer;
   /* border: 1px solid gray; */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18);
+  /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18); */
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px !important;
   color: #222;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 600 !important;
   transition: padding 0.1s !important;
+  z-index: 51;
 }
 
 .custom-marker:hover {
-  background-color: #3854F5 !important;
-  color: #fff;
-  z-index: 40 !important;
+  /* background-color: #3854F5 !important; */
+  z-index: 52 !important;
+  font-weight: 700 !important;
+  padding: 4px 14px !important;
+  margin-top: -2px;
+}
+
+.custom-marker-hidden {
+  color: transparent;
+  background-color: white;
+  border-radius: 2rem;
+  width: 20px !important;
+  height: 15px !important;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px !important;
+}
+
+.custom-marker-hidden:hover {
+  background-color: white;
+  /* padding: 2px 12px; */
+  border-radius: 28px;
+  cursor: pointer;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px !important;
+  color: #222;
+  width: fit-content !important;
+  height: fit-content !important;
+  font-size: 14px;
+  font-weight: 600 !important;
+  transition: padding 0.1s !important;
+  font-weight: 700 !important;
+  z-index: 52 !important;
   padding: 4px 14px !important;
   margin-top: -2px;
 }
 
 .active-marker {
-  background-color: #3854F5 !important;
-  color: #fff;
-  z-index: 40 !important;
+  background-color: hsl(240 5.9% 10%) !important;
+  color: #fff !important;
   padding: 4px 14px !important;
   margin-top: -2px;
+  border-radius: 28px;
+  cursor: pointer;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px !important;
+  width: fit-content !important;
+  height: fit-content !important;
+  font-size: 14px;
+  transition: padding 0.1s !important;
+  font-weight: 700 !important;
+  z-index: 52 !important;
+  padding: 4px 14px !important;
 }
 
 .fadeIn {
@@ -223,7 +261,7 @@
 
 .mapboxgl-popup {
   max-width: fit-content !important;
-  z-index: 50 !important;
+  z-index: 55 !important;
 }
 
 .mapboxgl-popup-content {
