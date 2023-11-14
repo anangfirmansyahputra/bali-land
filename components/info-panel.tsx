@@ -39,7 +39,7 @@ export default function InfoPanel({
           animate={{ opacity: 1, y: 0 }} // Tampil normal tanpa perubahan posisi y
           exit={{ opacity: 0, y: -100 }} // Menghilang ke atas dengan perubahan posisi y sebesar -20
           transition={{ duration: 0.1 }}
-          className="fixed z-[52] h-[calc(100vh-10px)] max-w-max sm:h-[calc(100vh-88px)] lg:w-[60%] xl:w-[50%] 2xl:w-[30%] top-0 mt-[88px] left-3 right-3 "
+          className="fixed z-[50] h-[calc(100vh-10px)] max-w-max sm:h-[calc(100vh-88px)] lg:w-[60%] xl:w-[50%] 2xl:w-[30%] top-0 mt-[88px] left-3 right-3 "
         >
           <Card
             role="button"
