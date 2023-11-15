@@ -353,7 +353,7 @@ export default function MapView() {
 
         if (!isMobile) {
           setShowInfoPanel(false)
-          
+
           const data = {
             ...plot,
             price: randomPrice,
@@ -603,7 +603,7 @@ export default function MapView() {
             setShowInfoPanel={setShowInfoPanel}
           />
         ) : (
-          <Card className="fixed right-3 left-3 bottom-3 z-[52] lg:w-[60%] xl:w-[50%] 2xl:w-[30%]">
+          <Card className="fixed right-3 left-3 bottom-0 z-[52] lg:w-[60%] xl:w-[50%] 2xl:w-[30%]">
             <CardHeader className="p-2" onClick={() => setShowInfoPanel(true)}>
               <Button variant={"ghost"}>
                 <ChevronUp />

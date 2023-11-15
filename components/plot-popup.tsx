@@ -103,7 +103,7 @@ export default function PlotPopup({ data, onClose }: PlotPopupProps) {
         </Button>
         <Slider
           {...settings}
-          className="w-full h-full over rounded-t-lg relative overflow-hidden"
+          className="w-full h-full rounded-t-lg relative overflow-hidden"
         >
           <div className="relative w-full aspect-video rounded-t-lg  bg-transparent">
             <Image

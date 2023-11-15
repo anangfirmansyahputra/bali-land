@@ -39,7 +39,7 @@ export default function InfoPanel({
           animate={{ opacity: 1, y: 0 }} // Tampil normal tanpa perubahan posisi y
           exit={{ opacity: 0, y: -100 }} // Menghilang ke atas dengan perubahan posisi y sebesar -20
           transition={{ duration: 0.1 }}
-          className="fixed z-[50] h-[calc(100vh-10px)] max-w-max sm:h-[calc(100vh-88px)] lg:w-[60%] xl:w-[50%] 2xl:w-[30%] top-0 mt-[88px] left-3 right-3 "
+          className="fixed z-[50] h-[calc(100vh-10px)] sm:h-[calc(100vh-88px)] lg:w-[60%] xl:w-[50%] 2xl:w-[30%] top-0 mt-[88px] left-3 right-3 "
         >
           <Card
             role="button"
@@ -60,7 +60,7 @@ export default function InfoPanel({
             </CardHeader>
             <CardContent
               onScroll={handleScroll}
-              className={`space-y-2 p-0 pr-2 xs:pr-5 h-[calc(100vh-150px)] sm:h-[calc(100vh-88px)] overflow-y-auto mx-4`}
+              className={`p-0 pr-2 xs:pr-5 h-[calc(100vh-150px)] sm:h-[calc(100vh-88px)] overflow-y-auto mx-4 grid   grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-5`}
             >
               {/* @ts-ignore */}
               {plots.slice(0, displayedPlots).map((plot: any) => {
