@@ -40,7 +40,7 @@ export default function PlotPopUpMobile({ data }: PlotPopUpMobile) {
         transition={{ duration: 0.2 }}
         className='fixed z-[52] bottom-[70px] w-full flex items-center justify-center'
       >
-      <Card className="relative max-w-[400px] w-full p-0 overflow-hidden border-none mx-5 " onClick={() => router.push(`/villa/${data.id}`)} role='button'>
+      <Card className="relative max-w-[400px] w-full p-0 overflow-hidden border-none mx-5 " role='button'>
         <Button
           className="absolute top-3 z-[50] left-3 rounded-full w-6 h-6"
           size={"icon"}
