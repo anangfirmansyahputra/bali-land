@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "./ui/card";
 import { useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface PlotPopUpMobile {
   data: any;
@@ -13,6 +14,7 @@ interface PlotPopUpMobile {
 
 export default function PlotPopUpMobile({ data }: PlotPopUpMobile) {
   const popupRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -26,6 +28,7 @@ export default function PlotPopUpMobile({ data }: PlotPopUpMobile) {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
+    
   }, [data.onClose]);
   
   return (
@@ -37,12 +40,12 @@ export default function PlotPopUpMobile({ data }: PlotPopUpMobile) {
         transition={{ duration: 0.2 }}
         className='fixed z-[52] bottom-[70px] w-full flex items-center justify-center'
       >
-      <Card className="relative max-w-[400px] w-full p-0 overflow-hidden border-none mx-5 ">
+      <Card className="relative max-w-[400px] w-full p-0 overflow-hidden border-none mx-5 " onClick={() => router.push(`/villa/${data.id}`)} role='button'>
         <Button
           className="absolute top-3 z-[50] left-3 rounded-full w-6 h-6"
           size={"icon"}
           variant={"secondary"}
-          onClick={data.onClose}
+          // onClick={data.onClose}
         >
           <X size={12} />
         </Button>

@@ -4,6 +4,8 @@ import { Map } from "mapbox-gl";
 import { ChevronLeft, ChevronRight, Heart, Star } from "lucide-react";
 import Slider from "react-slick";
 import { Button } from "./ui/button";
+import "slick-carousel/slick/slick-theme.css";
+import "slick-carousel/slick/slick.css";
 
 interface LandplotCardProps {
   // map: Map;

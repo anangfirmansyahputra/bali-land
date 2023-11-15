@@ -328,7 +328,6 @@ export default function MapView() {
 
       const marker = new mapboxgl.Marker({
         element: randomMarker,
-        anchor: "bottom",
       })
         .setLngLat((center as any).coordinates)
         .addTo(map);
@@ -557,8 +556,7 @@ export default function MapView() {
   useEffect(() => {
     const markers = document.getElementsByClassName("custom-marker");
     const markersHidden = document.getElementsByClassName(
-      "custom-marker-hidden"
-    );
+      "custom-marker-hidden");
     for (let i = 0; i < markers.length; i++) {
       const marker = markers[i];
 
@@ -567,9 +565,9 @@ export default function MapView() {
         Number((marker as HTMLElement).dataset.plotId) === plotActive;
 
       if (isActive) {
-        marker.classList.add("active-marker"); // Menambah class 'active-marker' pada marker yang aktif
+        marker.classList.add("active-marker"); 
       } else {
-        marker.classList.remove("active-marker"); // Menghapus class 'active-marker' dari marker yang tidak aktif
+        marker.classList.remove("active-marker");
       }
     }
 

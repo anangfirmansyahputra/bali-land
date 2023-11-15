@@ -9,6 +9,7 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "./ui/card";
 import { motion } from "framer-motion";
 import { useEffect, useRef } from "react";
+import { useParams, useRouter } from 'next/navigation';
 
 interface PlotPopupProps {
   data: any;
@@ -85,7 +86,7 @@ export default function PlotPopup({ data, onClose }: PlotPopupProps) {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <Card className="p-0 border-none max-w-[327px] relative z-[999] plot ">
+      <Card className="p-0 border-none max-w-[327px] relative z-[49] plot">
         <Button
           className="absolute top-3 z-[50] right-3 rounded-full w-7 h-7"
           size={"icon"}
