@@ -35,7 +35,7 @@ export default function PlotPopUpMobile({ data }: PlotPopUpMobile) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className='fixed z-[49] bottom-[80px] w-full flex items-center justify-center'
+        className='fixed z-[52] bottom-[70px] w-full flex items-center justify-center'
       >
       <Card className="relative max-w-[400px] w-full p-0 overflow-hidden border-none mx-5 ">
         <Button
