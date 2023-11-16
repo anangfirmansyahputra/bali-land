@@ -4,19 +4,20 @@ import badung from "@/data/badung.json";
 import extendedMasking from "@/data/extended-masking.json";
 import masking from "@/data/masking.json";
 import supabase from "@/supabase";
+import { ChevronUp } from "lucide-react";
 import mapboxgl, { Map } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useState } from "react";
+import { createRoot } from "react-dom/client";
 import wkx from "wkx";
 import InfoPanel from "./info-panel";
-import Loading from "./loading";
 import Menubar from "./menu-bar";
 import PlotPopup from "./plot-popup";
-import { createRoot } from "react-dom/client";
 import PlotPopUpMobile from "./plot-popup-mobile";
-import { Card, CardHeader } from "./ui/card";
+import InfoPanelSkeleton from "./skeleton/info-panel-skeleton";
+import MenuBarSkeleton from "./skeleton/menu-bar-skeleton";
 import { Button } from "./ui/button";
-import { ChevronUp } from "lucide-react";
+import { Card, CardHeader } from "./ui/card";
 
 export default function MapView() {
   const [instanceMap, setInstanceMap] = useState<Map>();
@@ -25,7 +26,6 @@ export default function MapView() {
   const [plots, setPlots] = useState<any[]>([]);
   const [plotActive, setPlotActive] = useState<number | null>(null);
   const [zoneActive, setZoneActive] = useState<string>("all");
-  const [showZoneFilter, setShowZoneFilter] = useState<boolean>(false);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [popupActive, setPopupActive] = useState<any | null>(null);
   let activePopup: mapboxgl.Popup | null = null;
@@ -579,24 +579,29 @@ export default function MapView() {
         Number((marker as HTMLElement).dataset.plotId) === plotActive;
 
       if (isActive) {
-        marker.classList.add("active-marker"); // Menambah class 'active-marker' pada marker yang aktif
+        marker.classList.add("active-marker");
       } else {
-        marker.classList.remove("active-marker"); // Menghapus class 'active-marker' dari marker yang tidak aktif
+        marker.classList.remove("active-marker");
       }
     }
   }, [plotActive]);
 
   return (
     <>
-      {isLoading && <Loading />}
       <div className="relative w-full h-screen">
         {instanceMap && (
-          <Menubar setZoneActive={setZoneActive} map={instanceMap} />
+          isLoading ?
+          <MenuBarSkeleton /> :
+          <Menubar 
+            setZoneActive={setZoneActive} 
+            map={instanceMap} 
+          />
         )}
         {showInfoPanel ? (
+          isLoading ?
+          <InfoPanelSkeleton /> :
           <InfoPanel
             plots={plots}
-            // map={instanceMap}
             isActive={showInfoPanel}
             setShowInfoPanel={setShowInfoPanel}
           />
