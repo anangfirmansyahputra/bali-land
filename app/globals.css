@@ -118,7 +118,7 @@
 
 .custom-marker:hover {
   /* background-color: #3854F5 !important; */
-  z-index: 51 !important;
+  z-index: 52 !important;
   font-weight: 700 !important;
   padding: 4px 14px !important;
   margin-top: -2px;
@@ -165,7 +165,7 @@
   width: fit-content !important;
   height: fit-content !important;
   color: #222;
-  z-index: 51 !important;
+  z-index: 52 !important;
   font-weight: 700 !important;
   padding: 4px 14px !important;
   margin-top: -2px;
@@ -184,7 +184,7 @@
   font-size: 14px;
   transition: padding 0.1s !important;
   font-weight: 700 !important;
-  z-index: 50 !important;
+  z-index: 51 !important;
   padding: 4px 14px !important;
 }
 

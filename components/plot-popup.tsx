@@ -8,12 +8,13 @@ import "slick-carousel/slick/slick.css";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "./ui/card";
 import { motion } from "framer-motion";
-import { useEffect, useRef } from "react";
-import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from "react";
+import { Skeleton } from "./ui/skeleton";
 
 interface PlotPopupProps {
   data: any;
   onClose: () => void;
+  handleNavigate: (url:string) => void;
 }
 
 function CustomArrow(props: any) {
@@ -25,21 +26,29 @@ function CustomArrow(props: any) {
         side === "next" ? "right-3" : "left-3"
       }`}
       style={{ ...style }}
-      onClick={onClick}
+
     >
       {side === "prev" ? (
         <Button
           size={"icon"}
           variant={"secondary"}
           className="rounded-full w-7 h-7"
-        >
+              onClick={(e) => {
+        e.stopPropagation()
+        onClick()
+      }}
+          >
           <ChevronLeft size={15} />
         </Button>
       ) : (
         <Button
-          size={"icon"}
-          variant={"secondary"}
-          className="rounded-full w-7 h-7"
+        size={"icon"}
+        variant={"secondary"}
+        className="rounded-full w-7 h-7"
+            onClick={(e) => {
+        e.stopPropagation()
+        onClick()
+      }}
         >
           <ChevronRight size={15} />
         </Button>
@@ -58,9 +67,14 @@ var settings = {
   prevArrow: <CustomArrow side="prev" />,
 };
 
-export default function PlotPopup({ data, onClose }: PlotPopupProps) {
+export default function PlotPopup({ data, onClose, handleNavigate }: PlotPopupProps) {
   const popupRef = useRef<HTMLDivElement>(null);
+  const [imageLoaded, setImageLoaded] = useState(true);
 
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+  };
+  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -80,25 +94,37 @@ export default function PlotPopup({ data, onClose }: PlotPopupProps) {
 
   return (
     <motion.div
-      ref={popupRef}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.5 }}
     >
-      <Card className="p-0 border-none max-w-[327px] relative z-[49] plot">
+      <Card 
+      // ref={popupRef}
+        role="button" 
+        className="p-0 border-none max-w-[327px] relative z-[49] plot"
+        onClick={() => handleNavigate(`/villa/123`)}
+      >
         <Button
           className="absolute top-3 z-[50] right-3 rounded-full w-7 h-7"
           size={"icon"}
           variant={"ghost"}
         >
-          <Heart size={15} className="text-white fill-[#00000080]" />
+          <Heart 
+            size={15} 
+            className="text-white fill-[#00000080]" 
+            onClick={(e) => {
+              e.stopPropagation()
+          }} />
         </Button>
         <Button
           className="absolute top-3 z-[50] left-3 rounded-full w-7 h-7"
           size={"icon"}
           variant={"secondary"}
-          onClick={onClose}
+          onClick={(e) => {
+            e.stopPropagation()
+            onClose();
+          }}
         >
           <X size={15} />
         </Button>
@@ -107,12 +133,15 @@ export default function PlotPopup({ data, onClose }: PlotPopupProps) {
           className="w-full h-full rounded-t-lg relative overflow-hidden"
         >
           <div className="relative w-full aspect-video rounded-t-lg  bg-transparent">
-            <Image
-              fill
-              src="/assets/vila.jpg"
-              className="object-cover"
-              alt="vila"
-            />
+            {imageLoaded ? (
+              <Image
+                fill
+                src="/assets/vila.jpg"
+                className="object-cover"
+                alt="vila"
+                onLoad={handleImageLoad}
+              />
+            ) : <Skeleton className="w-full h-full" />}
           </div>
           <div className="relative w-full aspect-video rounded-t-lg bg-transparent">
             <Image

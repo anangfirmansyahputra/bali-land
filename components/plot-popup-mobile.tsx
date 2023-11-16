@@ -33,19 +33,28 @@ export default function PlotPopUpMobile({ data }: PlotPopUpMobile) {
   
   return (
       <motion.div
-        ref={popupRef}
+        // ref={popupRef}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
         className='fixed z-[52] bottom-[70px] w-full flex items-center justify-center'
       >
-      <Card className="relative max-w-[400px] w-full p-0 overflow-hidden border-none mx-5 " role='button'>
+      <Card 
+        className="relative max-w-[400px] w-full p-0 overflow-hidden border-none mx-5 " 
+        role='button' 
+        onClick={(e) => {
+          router.push(`/villa/${data.id}`);
+        }}
+      >
         <Button
           className="absolute top-3 z-[50] left-3 rounded-full w-6 h-6"
           size={"icon"}
           variant={"secondary"}
-          // onClick={data.onClose}
+          onClick={(e) => {
+            e.stopPropagation();
+            data.onClose()
+          }}
         >
           <X size={12} />
         </Button>
@@ -69,7 +78,9 @@ export default function PlotPopUpMobile({ data }: PlotPopUpMobile) {
                 size={"icon"}
                 variant={"ghost"}
               >
-                <Heart size={15} className="text-white fill-[#00000080]" />
+                <Heart size={15} className="text-white fill-[#00000080]" onClick={(e) => {
+                  e.stopPropagation();
+                }} />
               </Button>
             </div>
             <div className="space-y-1">

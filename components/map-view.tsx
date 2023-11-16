@@ -19,8 +19,12 @@ import MenuBarSkeleton from "./skeleton/menu-bar-skeleton";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card, CardHeader } from "./ui/card";
+import { useRouter } from "next/navigation";
 
 export default function MapView() {
+  const router = useRouter()
+  
+  
   const [instanceMap, setInstanceMap] = useState<Map>();
   const [showInfoPanel, setShowInfoPanel] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -32,6 +36,7 @@ export default function MapView() {
   const [isDrag, setIsDrag] = useState(false)
   let activePopup: mapboxgl.Popup | null = null;
   let markers: any[] = [];
+  let activeMarker:any | null = null;
 
   // @ts-ignore
   let hoveredPolygonIdDistrict = null;
@@ -260,10 +265,16 @@ export default function MapView() {
   ) => {
     setIsDrag(true);
     // map.dragPan.disable()
-
     for (const marker of markers) {
-      marker.remove();
+      if (activeMarker !== null) {
+        if (marker !== activeMarker) {
+          marker.remove();
+        }
+      } else {
+        marker.remove();
+      }
     }
+
     
     let data: any[] = [];
     let start = 0;
@@ -381,7 +392,7 @@ export default function MapView() {
         Buffer.from(plot.center, "hex")
       ).toGeoJSON();
       const randomPrice = Math.floor(Math.random() * (1000 - 150 + 1)) + 150;
-      const randomNum = Math.random() < 0.1 ? 1 : 0;
+      const randomNum = Math.random() < 0.5 ? 1 : 0;
       let randomMarker;
 
       if (randomNum === 1) {
@@ -410,6 +421,7 @@ export default function MapView() {
           activePopup.remove();
         }
         setPlotActive(plot.id);
+        activeMarker = marker;
 
         if (isMobile) {
           const data = {
@@ -439,16 +451,18 @@ export default function MapView() {
           }).setLngLat((center as any).coordinates);
           createRoot(container).render(
             <PlotPopup
+              handleNavigate={handleNavigate}
               data={data}
               onClose={() => {
-                setPlotActive(null);
                 popup.remove();
+                setPlotActive(null);
               }}
             />
           );
 
           popup.setDOMContent(container);
 
+          
           marker.setPopup(popup);
 
           activePopup = popup;
@@ -472,6 +486,10 @@ export default function MapView() {
       setIsMobile(false);
     }
   };
+
+  const handleNavigate = (url: string) => {
+    router.push(url);
+  }
 
   useEffect(() => {
     mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
@@ -497,7 +515,6 @@ export default function MapView() {
 
     // @ts-ignore
     let hoveredPolygonId = null;
-
 
     map.on("load", async () => {
       await getDataBadung(map);
