@@ -16,6 +16,7 @@ import PlotPopup from "./plot-popup";
 import PlotPopUpMobile from "./plot-popup-mobile";
 import InfoPanelSkeleton from "./skeleton/info-panel-skeleton";
 import MenuBarSkeleton from "./skeleton/menu-bar-skeleton";
+import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card, CardHeader } from "./ui/card";
 
@@ -28,7 +29,9 @@ export default function MapView() {
   const [zoneActive, setZoneActive] = useState<string>("all");
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [popupActive, setPopupActive] = useState<any | null>(null);
+  const [isDrag, setIsDrag] = useState(false)
   let activePopup: mapboxgl.Popup | null = null;
+  let markers: any[] = [];
 
   // @ts-ignore
   let hoveredPolygonIdDistrict = null;
@@ -115,6 +118,7 @@ export default function MapView() {
     map.on("mouseleave", "badung-district-fills", function () {
       map.getCanvas().style.cursor = "auto";
     });
+
 
     // map.on("click", "badung-district-fills", function (e: any) {
     //   const clickedFeature = e.features[0];
@@ -221,7 +225,7 @@ export default function MapView() {
     });
   };
 
-  const getDataLandplots = async (map: Map) => {
+  const getDataLandplots = async () => {
     let data: any = [];
     let start = 0;
     let size = 1000;
@@ -245,8 +249,78 @@ export default function MapView() {
     }
 
     setPlots(data);
+  };
 
-    // Land Plots
+  const getDataNearby = async (
+    longitude: number,
+    latitude: number,
+    distance: number,
+    map: Map,
+    zoom: number
+  ) => {
+    setIsDrag(true);
+    // map.dragPan.disable()
+
+    for (const marker of markers) {
+      marker.remove();
+    }
+    
+    let data: any[] = [];
+    let start = 0;
+    let size = 1000;
+    let hasMore = true;
+
+    if (zoom > 13) {   
+      while (hasMore) {
+        const {
+          data: plots,
+          error,
+          count,
+        } = await supabase
+          .rpc("get_data_nearby", {
+            longitude,
+            latitude,
+            distance: zoom > 13 ? 1000 : 800 
+          })
+          .select("*")
+          .range(start, start + size - 1);
+  
+        if (error) throw error;
+  
+        data = [...data, ...plots];
+        start += size;
+        hasMore = (count ?? 0) > start;
+      }
+    } else {
+      const {data:far} = await supabase.rpc('get_data_farthest', {
+        longitude,
+        latitude,
+        limit: zoom > 12 ? 30 : 5,
+      })
+
+      data = far
+    }
+
+    if (data.length <= 4) {
+      const {data:far} = await supabase.rpc('get_data_farthest', {
+        longitude,
+        latitude,
+        limit: 30,
+      })
+
+      data = far
+    }
+
+    if (map.getLayer('plots-fills')) {
+      map.removeLayer('plots-fills');
+    }
+    if (map.getLayer('plots-outline')) {
+      map.removeLayer('plots-outline');
+    }
+    if (map.getSource('plots')) {
+      map.removeSource('plots');
+    }
+
     map.addSource("plots", {
       type: "geojson",
       data: {
@@ -254,9 +328,7 @@ export default function MapView() {
         features: data?.map((item: any) => {
           return {
             type: "Feature",
-            geometry: wkx.Geometry.parse(
-              Buffer.from(item.geometry, "hex")
-            ).toGeoJSON(),
+            geometry: item.geometry,
             properties: {
               center: wkx.Geometry.parse(
                 Buffer.from(item.center, "hex")
@@ -331,7 +403,8 @@ export default function MapView() {
       })
         .setLngLat((center as any).coordinates)
         .addTo(map);
-
+      
+      markers.push(marker);
       marker.getElement().addEventListener("click", function () {
         if (activePopup) {
           activePopup.remove();
@@ -351,7 +424,7 @@ export default function MapView() {
         }
 
         if (!isMobile) {
-          setShowInfoPanel(false)
+          setShowInfoPanel(false);
 
           const data = {
             ...plot,
@@ -382,6 +455,11 @@ export default function MapView() {
         }
       });
     });
+
+    setIsDrag(false)
+    // map.dragPan.enable()
+    
+    return data
   };
 
   const handleMediaQueryChange = (mediaQuery: MediaQueryListEvent) => {
@@ -418,10 +496,15 @@ export default function MapView() {
     // @ts-ignore
     let hoveredPolygonId = null;
 
+
     map.on("load", async () => {
       await getDataBadung(map);
       await getDataZoningArea(map);
-      await getDataLandplots(map);
+      await getDataLandplots();
+
+      const zoom = map.getZoom();
+        const { lat, lng } = map.getCenter();
+        await getDataNearby(lng, lat, 1000, map, zoom);
 
       map.getCanvas().style.cursor = "auto";
 
@@ -545,6 +628,27 @@ export default function MapView() {
       // });
 
       setIsLoading(false);
+
+      map.on('zoom', async () => {
+        const zoom = map.getZoom();
+        const { lat, lng } = map.getCenter();
+        const test = await getDataNearby(lng, lat, 1000, map, zoom);
+        console.log({
+          zoom:test
+        });
+        console.log(zoom);
+        
+      })
+
+      map.on("dragend", async () => {
+        const { lat, lng } = map.getCenter();
+        const zoom = map.getZoom()  
+        const test = await getDataNearby(lng, lat, 1000, map, zoom);
+        console.log({
+          drag:test
+        });
+      });
+  
     });
 
     return () => {
@@ -556,7 +660,8 @@ export default function MapView() {
   useEffect(() => {
     const markers = document.getElementsByClassName("custom-marker");
     const markersHidden = document.getElementsByClassName(
-      "custom-marker-hidden");
+      "custom-marker-hidden"
+    );
     for (let i = 0; i < markers.length; i++) {
       const marker = markers[i];
 
@@ -565,7 +670,7 @@ export default function MapView() {
         Number((marker as HTMLElement).dataset.plotId) === plotActive;
 
       if (isActive) {
-        marker.classList.add("active-marker"); 
+        marker.classList.add("active-marker");
       } else {
         marker.classList.remove("active-marker");
       }
@@ -589,22 +694,22 @@ export default function MapView() {
   return (
     <>
       <div className="relative w-full h-screen">
-        {instanceMap && (
-          isLoading ?
-          <MenuBarSkeleton /> :
-          <Menubar 
-            setZoneActive={setZoneActive} 
-            map={instanceMap} 
-          />
-        )}
+        {instanceMap &&
+          (isLoading ? (
+            <MenuBarSkeleton />
+          ) : (
+            <Menubar setZoneActive={setZoneActive} map={instanceMap} />
+          ))}
         {showInfoPanel ? (
-          isLoading ?
-          <InfoPanelSkeleton /> :
-          <InfoPanel
-            plots={plots}
-            isActive={showInfoPanel}
-            setShowInfoPanel={setShowInfoPanel}
-          />
+          isLoading ? (
+            <InfoPanelSkeleton />
+          ) : (
+            <InfoPanel
+              plots={plots}
+              isActive={showInfoPanel}
+              setShowInfoPanel={setShowInfoPanel}
+            />
+          )
         ) : (
           <Card className="fixed right-3 left-3 bottom-0 z-[52] lg:w-[60%] xl:w-[50%] 2xl:w-[30%]">
             <CardHeader className="p-2" onClick={() => setShowInfoPanel(true)}>
@@ -614,6 +719,7 @@ export default function MapView() {
             </CardHeader>
           </Card>
         )}
+        {isDrag && <Badge className="absolute z-[999] left-1/2 transform -translate-x-1/2 top-[88px] bg-black px-5 py-2">Loading...</Badge> }
         <div id="map" style={{ width: "100vw", height: "100vh" }}></div>
         {isMobile && popupActive && <PlotPopUpMobile data={popupActive} />}
       </div>

@@ -4,7 +4,7 @@ import wkx from "wkx";
 import LandplotCard from "./landplot-card";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface InfoPanelProps {
   // map: Map;
@@ -20,6 +20,22 @@ export default function InfoPanel({
   plots,
 }: InfoPanelProps) {
   const [displayedPlots, setDisplayedPlots] = useState(10);
+  const popupRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
+        setShowInfoPanel(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+    
+  }, [setShowInfoPanel]);
 
   const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, clientHeight, scrollHeight } = event.currentTarget;
@@ -34,6 +50,7 @@ export default function InfoPanel({
     <AnimatePresence>
       {isActive && (
         <motion.div
+          ref={popupRef}
           key="child"
           initial={{ opacity: 0, y: 100 }} // Muncul dari bawah dengan perubahan posisi y sebesar 20
           animate={{ opacity: 1, y: 0 }} // Tampil normal tanpa perubahan posisi y
