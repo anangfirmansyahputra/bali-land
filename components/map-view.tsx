@@ -491,6 +491,8 @@ export default function MapView() {
       ],
     });
 
+    map.dragPan.disable()
+
     setInstanceMap(map);
 
     // @ts-ignore
@@ -632,23 +634,15 @@ export default function MapView() {
       map.on('zoom', async () => {
         const zoom = map.getZoom();
         const { lat, lng } = map.getCenter();
-        const test = await getDataNearby(lng, lat, 1000, map, zoom);
-        console.log({
-          zoom:test
-        });
-        console.log(zoom);
-        
+        await getDataNearby(lng, lat, 1000, map, zoom);
       })
 
       map.on("dragend", async () => {
         const { lat, lng } = map.getCenter();
         const zoom = map.getZoom()  
-        const test = await getDataNearby(lng, lat, 1000, map, zoom);
-        console.log({
-          drag:test
-        });
+        await getDataNearby(lng, lat, 1000, map, zoom);
       });
-  
+      map.dragPan.enable()
     });
 
     return () => {
@@ -694,12 +688,13 @@ export default function MapView() {
   return (
     <>
       <div className="relative w-full h-screen">
-        {instanceMap &&
-          (isLoading ? (
+          {isLoading ? (
             <MenuBarSkeleton />
           ) : (
+            instanceMap && 
             <Menubar setZoneActive={setZoneActive} map={instanceMap} />
-          ))}
+            
+          )}
         {showInfoPanel ? (
           isLoading ? (
             <InfoPanelSkeleton />
@@ -719,7 +714,7 @@ export default function MapView() {
             </CardHeader>
           </Card>
         )}
-        {isDrag && <Badge className="absolute z-[999] left-1/2 transform -translate-x-1/2 top-[88px] bg-black px-5 py-2">Loading...</Badge> }
+        {isDrag && <Badge className="absolute z-[999] left-1/2 transform -translate-x-1/2 top-7 sm:top-[88px] bg-black px-5 py-2">Loading...</Badge> }
         <div id="map" style={{ width: "100vw", height: "100vh" }}></div>
         {isMobile && popupActive && <PlotPopUpMobile data={popupActive} />}
       </div>
