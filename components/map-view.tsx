@@ -38,8 +38,7 @@ export default function MapView() {
   let markers: any[] = [];
   let activeMarker:any | null = null;
 
-  // @ts-ignore
-  let hoveredPolygonIdDistrict = null;
+  let hoveredPolygonIdDistrict: any = null;
   let hoveredPolygonIdPlot: string | number | null = null;
 
   const getDataBadung = async (map: Map) => {
@@ -86,17 +85,16 @@ export default function MapView() {
 
     map.on("mousemove", "badung-district-fills", (e) => {
       if (e.features?.length || 0 > 0) {
-        // @ts-ignore
         if (hoveredPolygonIdDistrict !== null) {
           map.setFeatureState(
-            // @ts-ignore
             { source: "badung-district", id: hoveredPolygonIdDistrict },
             { hover: false }
           );
         }
 
-        // @ts-ignore
-        hoveredPolygonIdDistrict = e.features[0].id;
+        if (e.features) {
+          hoveredPolygonIdDistrict = e.features[0].id;
+        }
         map.setFeatureState(
           { source: "badung-district", id: hoveredPolygonIdDistrict },
           { hover: true }
@@ -105,10 +103,8 @@ export default function MapView() {
     });
 
     map.on("mouseleave", "badung-district-fills", () => {
-      // @ts-ignore
       if (hoveredPolygonIdDistrict !== null) {
         map.setFeatureState(
-          // @ts-ignore
           { source: "badung-district", id: hoveredPolygonIdDistrict },
           { hover: false }
         );
@@ -123,18 +119,6 @@ export default function MapView() {
     map.on("mouseleave", "badung-district-fills", function () {
       map.getCanvas().style.cursor = "auto";
     });
-
-
-    // map.on("click", "badung-district-fills", function (e: any) {
-    //   const clickedFeature = e.features[0];
-
-    //   if (clickedFeature) {
-    //     map.flyTo({
-    //       center: e.lngLat,
-    //       zoom: 15,
-    //     });
-    //   }
-    // });
   };
 
   const getDataZoningArea = async (map: Map) => {
@@ -264,7 +248,6 @@ export default function MapView() {
     zoom: number
   ) => {
     setIsDrag(true);
-    // map.dragPan.disable()
     for (const marker of markers) {
       if (activeMarker !== null) {
         if (marker !== activeMarker) {
@@ -275,7 +258,6 @@ export default function MapView() {
       }
     }
 
-    
     let data: any[] = [];
     let start = 0;
     let size = 1000;
@@ -471,8 +453,6 @@ export default function MapView() {
     });
 
     setIsDrag(false)
-    // map.dragPan.enable()
-    
     return data
   };
 
@@ -507,14 +487,14 @@ export default function MapView() {
         [114.2, -9.1],
         [116.2, -8.2],
       ],
+      attributionControl: false
     });
 
     map.dragPan.disable()
 
     setInstanceMap(map);
 
-    // @ts-ignore
-    let hoveredPolygonId = null;
+    let hoveredPolygonId: any = null;
 
     map.on("load", async () => {
       await getDataBadung(map);
@@ -533,7 +513,6 @@ export default function MapView() {
         type: "fill",
         source: {
           type: "geojson",
-          // @ts-ignore
           data: masking,
         },
         layout: {},
@@ -541,14 +520,13 @@ export default function MapView() {
           "fill-color": "#fff",
           "fill-opacity": 1,
         },
-      });
+      } as mapboxgl.AnyLayer );
 
       // Regency
       map.addSource("regency", {
         type: "geojson",
-        // @ts-ignore
         data: badung,
-      });
+      } as any);
 
       map.addLayer({
         id: "regency-fills",
@@ -587,27 +565,26 @@ export default function MapView() {
         type: "fill",
         source: {
           type: "geojson",
-          // @ts-ignore
           data: extendedMasking,
         },
         layout: {},
         paint: {
           "fill-color": "#fff",
         },
-      });
+      } as mapboxgl.AnyLayer);
 
       map.on("mousemove", "regency-fills", (e) => {
         if (e.features?.length || 0 > 0) {
-          // @ts-ignore
           if (hoveredPolygonId !== null) {
             map.setFeatureState(
-              // @ts-ignore
               { source: "regency", id: hoveredPolygonId },
               { hover: false }
             );
           }
-          // @ts-ignore
-          hoveredPolygonId = e.features[0].id;
+
+          if (e.features) {
+            hoveredPolygonId = e.features[0].id;
+          }
           map.setFeatureState(
             { source: "regency", id: hoveredPolygonId },
             { hover: true }
@@ -616,10 +593,8 @@ export default function MapView() {
       });
 
       map.on("mouseleave", "regency-fills", () => {
-        // @ts-ignore
         if (hoveredPolygonId !== null) {
           map.setFeatureState(
-            // @ts-ignore
             { source: "regency", id: hoveredPolygonId },
             { hover: false }
           );
@@ -634,17 +609,6 @@ export default function MapView() {
       map.on("mouseleave", "regency-fills", function () {
         map.getCanvas().style.cursor = "auto";
       });
-
-      // map.on("click", "regency-fills", function (e: any) {
-      //   const clickedFeature = e.features[0];
-
-      //   if (clickedFeature) {
-      //     map.flyTo({
-      //       center: e.lngLat,
-      //       zoom: 10,
-      //     });
-      //   }
-      // });
 
       setIsLoading(false);
 
