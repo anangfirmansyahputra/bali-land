@@ -5,7 +5,7 @@ import LandplotCardSkeleton from "./landplot-card-skeleton";
 export default function InfoPanelSkeleton() {
   return (
     <div
-    className="fixed z-[50] h-[calc(100vh-10px)] sm:h-[calc(100vh-88px)] lg:w-[60%] xl:w-[50%] 2xl:w-[30%] top-0 mt-[88px] left-3 right-3 "
+    className="fixed z-[60] h-[calc(100vh-10px)] sm:h-[calc(100vh-88px)] lg:w-[60%] xl:w-[50%] 2xl:w-[30%] top-0 mt-[88px] left-3 right-3 "
   >
     <Card
       role="button"

@@ -5,8 +5,9 @@ import { Heart, Star, X } from "lucide-react";
 import Image from "next/image";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "./ui/card";
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 interface PlotPopUpMobile {
   data: any;
@@ -15,6 +16,7 @@ interface PlotPopUpMobile {
 export default function PlotPopUpMobile({ data }: PlotPopUpMobile) {
   const popupRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const [show, setShow] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -31,14 +33,14 @@ export default function PlotPopUpMobile({ data }: PlotPopUpMobile) {
     
   }, [data.onClose]);
   
+  useEffect(() => {
+    setShow(true);
+  }, [])
+  
   return (
-      <motion.div
+      <div
         // ref={popupRef}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        className='fixed z-[52] bottom-[70px] w-full flex items-center justify-center'
+        className={cn('fixed z-[52] bottom-[70px] w-full flex items-center justify-center duration-500 transition-opacity', show ? "opacity-100" : "opacity-0")}
       >
       <Card 
         className="relative max-w-[400px] w-full p-0 overflow-hidden border-none mx-5 " 
@@ -53,7 +55,10 @@ export default function PlotPopUpMobile({ data }: PlotPopUpMobile) {
           variant={"secondary"}
           onClick={(e) => {
             e.stopPropagation();
-            data.onClose()
+            setShow(false)
+            setTimeout(() => {
+              data.onClose()
+            }, 500)
           }}
         >
           <X size={12} />
@@ -64,7 +69,8 @@ export default function PlotPopUpMobile({ data }: PlotPopUpMobile) {
               src={"/assets/vila.jpg"}
               fill
               alt="vila"
-              className="object-cover"
+              className="object-cover transition-opacity opacity-0 duration-[2s]"
+              onLoadingComplete={(image) => image.classList.remove('opacity-0')}
             />
           </div>
           <div className="p-2 flex-1 flex flex-col justify-between truncate">
@@ -96,6 +102,6 @@ export default function PlotPopUpMobile({ data }: PlotPopUpMobile) {
           </div>
         </CardContent>
       </Card>
-      </motion.div>
+      </div>
   );
 }

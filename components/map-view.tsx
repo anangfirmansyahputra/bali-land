@@ -418,7 +418,7 @@ export default function MapView() {
         }
 
         if (!isMobile) {
-          setShowInfoPanel(false);
+          // setShowInfoPanel(false);
 
           const data = {
             ...plot,
@@ -674,27 +674,22 @@ export default function MapView() {
           ) : (
             instanceMap && 
             <Menubar setZoneActive={setZoneActive} map={instanceMap} />
-            
           )}
-        {showInfoPanel ? (
-          isLoading ? (
+          {isLoading ? (
             <InfoPanelSkeleton />
           ) : (
-            <InfoPanel
+            showInfoPanel && <InfoPanel
               plots={plots}
-              isActive={showInfoPanel}
               setShowInfoPanel={setShowInfoPanel}
             />
-          )
-        ) : (
-          <Card className="fixed right-3 left-3 bottom-0 z-[52] lg:w-[60%] xl:w-[50%] 2xl:w-[30%]">
+          )}
+          <Card className="fixed right-3 left-3 bottom-0 z-[51] lg:w-[60%] xl:w-[50%] 2xl:w-[30%]">
             <CardHeader className="p-2" onClick={() => setShowInfoPanel(true)}>
               <Button variant={"ghost"}>
                 <ChevronUp />
               </Button>
             </CardHeader>
           </Card>
-        )}
         {isDrag && <Badge className="absolute z-[999] left-1/2 transform -translate-x-1/2 top-7 sm:top-[88px] bg-black px-5 py-2">Loading...</Badge> }
         <div id="map" style={{ width: "100vw", height: "100vh" }}></div>
         {isMobile && popupActive && <PlotPopUpMobile data={popupActive} />}

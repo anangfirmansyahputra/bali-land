@@ -81,16 +81,18 @@ LandplotCardProps) {
           <Image
             fill
             src="/assets/vila.jpg"
-            className="object-cover"
+            className="object-cover transition-opacity opacity-0 duration-[2s]"
             alt="vila"
+            onLoadingComplete={(image) => image.classList.remove('opacity-0')}
           />
         </div>
         <div className="w-full aspect-square relative rounded-xl">
           <Image
             fill
             src="/assets/vila2.jpg"
-            className="object-cover"
+            className="object-cover transition-opacity opacity-0 duration-[2s]"
             alt="vila"
+            onLoadingComplete={(image) => image.classList.remove('opacity-0')}
           />
         </div>
       </Slider>

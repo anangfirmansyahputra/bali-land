@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardTitle } from "./ui/card";
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { Skeleton } from "./ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface PlotPopupProps {
   data: any;
@@ -70,6 +71,7 @@ var settings = {
 export default function PlotPopup({ data, onClose, handleNavigate }: PlotPopupProps) {
   const popupRef = useRef<HTMLDivElement>(null);
   const [imageLoaded, setImageLoaded] = useState(true);
+  const [show, setShow] = useState(false);
 
   const handleImageLoad = () => {
     setImageLoaded(true);
@@ -81,7 +83,10 @@ export default function PlotPopup({ data, onClose, handleNavigate }: PlotPopupPr
         popupRef.current &&
         !popupRef.current.contains(event.target as Node)
       ) {
-        onClose();
+        setShow(false);
+        setTimeout(() => {
+          onClose();
+        }, 500)
       }
     };
 
@@ -92,17 +97,16 @@ export default function PlotPopup({ data, onClose, handleNavigate }: PlotPopupPr
     };
   }, [onClose]);
 
+  useEffect(() => {
+    setShow(true)
+  }, [])
+
   return (
-    <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    exit={{ opacity: 0 }}
-    transition={{ duration: 0.5 }}
-    >
+
       <Card 
       // ref={popupRef}
         role="button" 
-        className="p-0 border-none max-w-[327px] relative z-[49] plot"
+        className={cn("p-0 border-none max-w-[327px] relative z-[49] plot duration-500 transition-opacity", show ? "opacity-1" : "opacity-0" )}
         onClick={() => handleNavigate(`/villa/123`)}
       >
         <Button
@@ -123,7 +127,10 @@ export default function PlotPopup({ data, onClose, handleNavigate }: PlotPopupPr
           variant={"secondary"}
           onClick={(e) => {
             e.stopPropagation()
-            onClose();
+            setShow(false);
+            setTimeout(() => {
+              onClose();
+            }, 500)
           }}
         >
           <X size={15} />
@@ -137,9 +144,10 @@ export default function PlotPopup({ data, onClose, handleNavigate }: PlotPopupPr
               <Image
                 fill
                 src="/assets/vila.jpg"
-                className="object-cover"
+                className="object-cover transition-opacity opacity-0 duration-[2s]"
+                onLoadingComplete={(image) => image.classList.remove('opacity-0')}
                 alt="vila"
-                onLoad={handleImageLoad}
+                priority
               />
             ) : <Skeleton className="w-full h-full" />}
           </div>
@@ -147,8 +155,10 @@ export default function PlotPopup({ data, onClose, handleNavigate }: PlotPopupPr
             <Image
               fill
               src="/assets/vila2.jpg"
-              className="object-cover"
+              className="object-cover transition-opacity opacity-0 duration-[2s]"
               alt="vila"
+              onLoadingComplete={(image) => image.classList.remove('opacity-0')}
+              priority
             />
           </div>
         </Slider>
@@ -190,6 +200,5 @@ export default function PlotPopup({ data, onClose, handleNavigate }: PlotPopupPr
           <p className="font-medium text-sm">${data.price}K</p>
         </CardContent>
       </Card>
-    </motion.div>
   );
 }
